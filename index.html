@@ -2,254 +2,250 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<title>Quiz Clash ⚡ Science</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<title>Quiz Gyan ⚡ Science</title>
+<meta name="description" content="Quiz Gyan — a fun Science quiz battle for students. Duel friends, learn from every question, and build your streak.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   QUIZ CLASH — SCIENCE
-   A no-database, no-paid-API quiz duel.
-   Questions: Open Trivia DB (free) with a built-in fallback bank.
-   Battles travel inside the share link. Streaks live in localStorage.
+   QUIZ GYAN — SCIENCE
+   Built by Aftabuddin · a student at Umeed Global School
+   A no-database, free study game. Each battle travels inside its
+   share link; streaks live in your browser. 150+ Science questions
+   are built in, each with a short explanation so you learn as you play.
    ============================================================ */
 
 :root{
-  --bg:#0a0e1a;
-  --bg2:#0f1730;
-  --text:#eaf1ff;
-  --muted:#8095c0;
-  --line:rgba(255,255,255,.10);
-  --surface:rgba(255,255,255,.045);
+  --paper:#fbf6ee;
+  --paper2:#f4ebdd;
+  --ink:#13233f;
+  --ink-soft:#5d6c86;
+  --card:#ffffff;
+  --line:rgba(19,35,63,.10);
 
-  --cyan:#36e6ff;   /* you / primary */
-  --lime:#b6ff3b;   /* science / correct */
-  --magenta:#ff3ea5;/* opponent / VS */
-  --amber:#ffc43d;  /* streak */
-  --red:#ff556a;    /* wrong */
-  --green:#2fe08a;  /* correct */
+  --brand:#3257f0;     /* cobalt — you / primary */
+  --brand-dk:#2241c9;
+  --amber:#ffb300;     /* knowledge / streak / energy */
+  --coral:#ff5d73;     /* opponent / fun pop */
+  --green:#1faf6b;     /* correct */
+  --red:#e8425a;       /* wrong */
 
-  --font-display:'Lilita One', system-ui, sans-serif;
-  --font-body:'Nunito', system-ui, sans-serif;
-  --r:22px;
+  --f-display:'Fredoka', system-ui, sans-serif;
+  --f-body:'Plus Jakarta Sans', system-ui, sans-serif;
+  --r:20px;
+  --shadow:0 18px 40px -20px rgba(19,35,63,.30);
 }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{
-  font-family:var(--font-body);
-  color:var(--text);
-  background:var(--bg);
+  font-family:var(--f-body);color:var(--ink);background:var(--paper);
   background-image:
-    radial-gradient(900px 500px at 12% -8%, rgba(54,230,255,.18), transparent 60%),
-    radial-gradient(800px 500px at 100% 0%, rgba(255,62,165,.16), transparent 55%),
-    radial-gradient(900px 700px at 50% 115%, rgba(182,255,59,.10), transparent 60%),
-    linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
-  background-attachment:fixed;
-  min-height:100dvh;
-  display:flex;
-  align-items:flex-start;
-  justify-content:center;
-  padding:22px 16px 60px;
-  overflow-x:hidden;
+    radial-gradient(700px 420px at 8% -6%, rgba(50,87,240,.10), transparent 60%),
+    radial-gradient(680px 420px at 100% 4%, rgba(255,93,115,.10), transparent 60%),
+    radial-gradient(760px 560px at 50% 116%, rgba(255,179,0,.12), transparent 60%),
+    linear-gradient(180deg, var(--paper), var(--paper2));
+  background-attachment:fixed;min-height:100dvh;
+  display:flex;justify-content:center;
+  padding:18px 16px calc(28px + env(safe-area-inset-bottom));
 }
-/* faint dot texture */
-body::before{
-  content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;
-  background-image:radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
-  background-size:26px 26px;
-  mask-image:radial-gradient(ellipse at 50% 30%, #000 40%, transparent 85%);
-}
+/* floating decorative shapes */
+.deco{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.deco span{position:absolute;border-radius:30%;opacity:.10;filter:blur(.5px);animation:float 9s ease-in-out infinite}
+.deco span:nth-child(1){width:90px;height:90px;background:var(--brand);left:6%;top:14%;border-radius:50%}
+.deco span:nth-child(2){width:60px;height:60px;background:var(--amber);right:9%;top:24%;animation-delay:1.2s}
+.deco span:nth-child(3){width:120px;height:120px;background:var(--coral);left:-3%;bottom:14%;border-radius:46% 54% 60% 40%;animation-delay:.6s}
+.deco span:nth-child(4){width:70px;height:70px;background:var(--green);right:4%;bottom:20%;border-radius:50%;animation-delay:2s}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-22px) rotate(12deg)}}
 
-.app{width:100%;max-width:480px;position:relative;z-index:2}
+.app{width:100%;max-width:480px;position:relative;z-index:1;display:flex;flex-direction:column;min-height:100%}
 
-/* ---------- shared bits ---------- */
-.card{
-  background:var(--surface);
-  border:1px solid var(--line);
-  border-radius:var(--r);
-  padding:22px;
-  backdrop-filter:blur(8px);
-  box-shadow:0 30px 60px -30px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.06);
-}
-.screen{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
-@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+/* ---------- top bar ---------- */
+.bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mark{display:flex;align-items:center;gap:9px;cursor:pointer;background:none;border:none;font:inherit}
+.tile{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:20px;
+  background:linear-gradient(135deg,var(--brand),#5b7bff);box-shadow:0 8px 18px -8px var(--brand)}
+.word{font-family:var(--f-display);font-weight:700;font-size:23px;letter-spacing:.2px;line-height:1}
+.word b{color:var(--brand)}
+.icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);
+  font-size:18px;cursor:pointer;box-shadow:var(--shadow);transition:transform .1s}
+.icon-btn:active{transform:scale(.92)}
+
+/* ---------- cards / screens ---------- */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px;box-shadow:var(--shadow)}
+.screen{animation:rise .45s cubic-bezier(.2,.8,.2,1) both;flex:1 0 auto}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .hidden{display:none !important}
 
-.brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px}
-.logo{
-  font-family:var(--font-display);
-  font-size:clamp(34px,9vw,46px);
-  line-height:.95;letter-spacing:.5px;
-  background:linear-gradient(92deg,var(--cyan),var(--lime));
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  text-shadow:0 0 40px rgba(54,230,255,.25);
-}
-.badge{
-  font-family:var(--font-display);font-size:13px;letter-spacing:1px;
-  color:#06210a;background:var(--lime);
-  padding:5px 10px;border-radius:999px;transform:rotate(-3deg);
-  box-shadow:0 6px 18px -6px var(--lime);
-  display:inline-flex;gap:5px;align-items:center;
-}
-.tagline{text-align:center;color:var(--muted);font-weight:700;margin:8px 0 20px;font-size:15px}
+/* ---------- home ---------- */
+.hero{text-align:center;margin:6px 0 16px}
+.hero .big{font-family:var(--f-display);font-weight:700;font-size:clamp(38px,11vw,52px);line-height:.95}
+.hero .big b{background:linear-gradient(95deg,var(--brand),var(--coral));-webkit-background-clip:text;background-clip:text;color:transparent}
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--f-display);font-weight:600;font-size:13px;
+  color:#5a3b00;background:linear-gradient(90deg,var(--amber),#ffd166);padding:5px 12px;border-radius:999px;
+  margin-top:8px;box-shadow:0 8px 18px -8px var(--amber);transform:rotate(-2deg)}
+.sub{color:var(--ink-soft);font-weight:600;font-size:15px;margin-top:12px}
 
-label.fld{display:block;font-weight:800;font-size:13px;color:var(--muted);margin:0 0 7px 3px;text-transform:uppercase;letter-spacing:.6px}
-input[type=text]{
-  width:100%;font-family:var(--font-body);font-weight:700;font-size:16px;color:var(--text);
-  background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px;padding:13px 15px;outline:none;
-  transition:border-color .2s, box-shadow .2s;
-}
-input[type=text]:focus{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(54,230,255,.15)}
+label.fld{display:block;font-weight:800;font-size:12px;color:var(--ink-soft);margin:0 0 7px 2px;text-transform:uppercase;letter-spacing:.7px}
+input[type=text]{width:100%;font-family:var(--f-body);font-weight:700;font-size:16px;color:var(--ink);
+  background:var(--paper);border:1.5px solid var(--line);border-radius:13px;padding:13px 15px;outline:none;transition:.2s}
+input[type=text]:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(50,87,240,.14);background:#fff}
 
-.seg{display:flex;gap:8px;margin-bottom:18px}
-.seg button{
-  flex:1;font-family:var(--font-body);font-weight:800;font-size:15px;color:var(--muted);
-  background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px;padding:12px 6px;cursor:pointer;
-  transition:.18s;
-}
-.seg button:hover{color:var(--text);border-color:rgba(255,255,255,.25)}
-.seg button.on{
-  color:#04121f;background:var(--cyan);border-color:var(--cyan);
-  box-shadow:0 8px 22px -8px var(--cyan);
-}
+.seg{display:flex;gap:8px;margin-bottom:16px}
+.seg button{flex:1;font-family:var(--f-body);font-weight:800;font-size:15px;color:var(--ink-soft);
+  background:var(--paper);border:1.5px solid var(--line);border-radius:13px;padding:12px 4px;cursor:pointer;transition:.15s}
+.seg button:hover{border-color:rgba(19,35,63,.25)}
+.seg button.on{color:#fff;background:linear-gradient(95deg,var(--brand),#4f6dff);border-color:var(--brand);box-shadow:0 8px 18px -8px var(--brand)}
+.seg.warm button.on{background:linear-gradient(95deg,#f59e0b,var(--amber));border-color:var(--amber);color:#3a2600}
 
-.btn{
-  width:100%;font-family:var(--font-display);font-size:21px;letter-spacing:.5px;
-  color:#04121f;border:none;border-radius:16px;padding:17px;cursor:pointer;
-  background:linear-gradient(95deg,var(--cyan),var(--lime));
-  box-shadow:0 14px 30px -12px var(--cyan);
-  transition:transform .08s, box-shadow .2s, filter .2s;
-}
+.btn{width:100%;font-family:var(--f-display);font-weight:600;font-size:21px;letter-spacing:.3px;color:#fff;border:none;
+  border-radius:15px;padding:16px;cursor:pointer;background:linear-gradient(95deg,var(--brand),#5b7bff);
+  box-shadow:0 14px 26px -12px var(--brand);transition:transform .08s,filter .2s}
 .btn:hover{filter:brightness(1.05)}
-.btn:active{transform:translateY(3px);box-shadow:0 6px 16px -10px var(--cyan)}
-.btn.ghost{
-  background:transparent;color:var(--text);border:1px solid var(--line);
-  box-shadow:none;font-size:17px;
-}
+.btn:active{transform:translateY(3px)}
+.btn.coral{background:linear-gradient(95deg,var(--coral),#ff8a99);box-shadow:0 14px 26px -12px var(--coral)}
+.btn.amber{background:linear-gradient(95deg,#f59e0b,var(--amber));color:#3a2600;box-shadow:0 14px 26px -12px var(--amber)}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);box-shadow:none;font-size:17px}
 .btn.ghost:active{transform:translateY(2px)}
-.btn.pink{background:linear-gradient(95deg,var(--magenta),#ff7ac4);box-shadow:0 14px 30px -12px var(--magenta)}
 .btn.row{margin-top:10px}
 
-/* ---------- stats strip ---------- */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
-.stat{background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:14px;padding:11px 6px;text-align:center}
-.stat .n{font-family:var(--font-display);font-size:24px;line-height:1}
-.stat .l{font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
-.stat.flame .n{color:var(--amber)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:18px}
+.stat{background:var(--paper);border:1.5px solid var(--line);border-radius:14px;padding:11px 4px;text-align:center}
+.stat .n{font-family:var(--f-display);font-weight:700;font-size:23px;line-height:1}
+.stat .l{font-size:10px;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.4px;margin-top:5px}
+.stat.fire .n{color:#f59e0b}
 
 .how{margin-top:16px;text-align:center}
-.how summary{cursor:pointer;color:var(--muted);font-weight:800;font-size:13px;list-style:none}
+.how summary{cursor:pointer;color:var(--ink-soft);font-weight:800;font-size:13px;list-style:none}
 .how summary::-webkit-details-marker{display:none}
-.how p{color:var(--muted);font-size:13.5px;line-height:1.6;margin-top:10px;text-align:left}
-
-/* ---------- quiz ---------- */
-.qtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.qcount{font-family:var(--font-display);font-size:15px;color:var(--muted);letter-spacing:.5px}
-.qscore{font-family:var(--font-display);font-size:15px;color:var(--lime);background:rgba(182,255,59,.12);padding:5px 12px;border-radius:999px}
-.timerwrap{height:9px;background:rgba(0,0,0,.3);border-radius:999px;overflow:hidden;margin-bottom:18px;border:1px solid var(--line)}
-.timerbar{height:100%;width:100%;background:linear-gradient(90deg,var(--lime),var(--cyan));border-radius:999px;transition:width .12s linear}
-.timerbar.warn{background:linear-gradient(90deg,var(--amber),var(--red))}
-
-.question{font-family:var(--font-body);font-weight:800;font-size:clamp(19px,5vw,23px);line-height:1.35;margin-bottom:20px;min-height:64px}
-
-.opts{display:flex;flex-direction:column;gap:11px}
-.opt{
-  display:flex;align-items:center;gap:13px;text-align:left;
-  font-family:var(--font-body);font-weight:700;font-size:16px;color:var(--text);
-  background:rgba(255,255,255,.04);border:1.5px solid var(--line);border-radius:15px;padding:15px 15px;cursor:pointer;
-  transition:transform .08s, border-color .15s, background .15s;
-}
-.opt:hover:not([disabled]){border-color:rgba(255,255,255,.35);transform:translateX(3px)}
-.opt[disabled]{cursor:default}
-.opt .key{
-  flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
-  font-family:var(--font-display);font-size:15px;color:var(--muted);
-  background:rgba(0,0,0,.3);border:1px solid var(--line);
-}
-.opt.correct{border-color:var(--green);background:rgba(47,224,138,.16)}
-.opt.correct .key{background:var(--green);color:#04210f}
-.opt.wrong{border-color:var(--red);background:rgba(255,85,106,.16);animation:shake .4s}
-.opt.wrong .key{background:var(--red);color:#2a0007}
-.opt .mark{margin-left:auto;font-family:var(--font-display);font-size:18px}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.how p{color:var(--ink-soft);font-size:13.5px;line-height:1.65;margin-top:10px;text-align:left}
 
 /* ---------- challenge intro ---------- */
-.vs-intro{text-align:center}
-.swords{font-size:52px;filter:drop-shadow(0 8px 22px rgba(255,62,165,.5));animation:pop .6s cubic-bezier(.2,1.4,.4,1) both}
+.vs{text-align:center}
+.vs .swords{font-size:54px;animation:pop .6s cubic-bezier(.2,1.5,.4,1) both;filter:drop-shadow(0 10px 20px rgba(255,93,115,.4))}
 @keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
-.challenger{font-family:var(--font-display);font-size:clamp(26px,7vw,34px);margin:12px 0 4px;line-height:1.05}
-.challenger b{color:var(--magenta)}
-.target{color:var(--muted);font-weight:800;margin-bottom:6px}
-.target .beat{color:var(--amber)}
+.vs h2{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,7vw,34px);margin:12px 0 4px;line-height:1.05}
+.vs h2 b{color:var(--coral)}
+.vs .target{color:var(--ink-soft);font-weight:700;font-size:15px}
+.vs .target .beat{color:#f59e0b;font-weight:800}
+
+/* ---------- quiz ---------- */
+.q-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:10px}
+.dots{display:flex;gap:5px;flex-wrap:wrap}
+.dots i{width:9px;height:9px;border-radius:50%;background:var(--line);transition:.25s}
+.dots i.done{background:var(--green)}
+.dots i.active{background:var(--brand);transform:scale(1.35)}
+.q-meta{display:flex;align-items:center;gap:8px;flex:none}
+.combo{font-family:var(--f-display);font-weight:600;font-size:13px;color:#b45309;background:#fff3d6;
+  border:1px solid #ffe0a3;padding:4px 9px;border-radius:999px;opacity:0;transform:scale(.7);transition:.2s}
+.combo.show{opacity:1;transform:scale(1);animation:bump .3s}
+@keyframes bump{50%{transform:scale(1.18)}}
+.scorechip{font-family:var(--f-display);font-weight:600;font-size:14px;color:var(--brand);background:rgba(50,87,240,.10);padding:5px 11px;border-radius:999px}
+
+.timerwrap{height:9px;background:var(--paper);border:1px solid var(--line);border-radius:999px;overflow:hidden;margin-bottom:18px}
+#timerbar{height:100%;width:100%;background:linear-gradient(90deg,var(--green),var(--brand));border-radius:999px}
+#timerbar.warn{background:linear-gradient(90deg,var(--amber),var(--red))}
+
+.q-text{font-weight:800;font-size:clamp(19px,5vw,23px);line-height:1.4;margin-bottom:18px;min-height:58px}
+.opts{display:flex;flex-direction:column;gap:11px}
+.opt{display:flex;align-items:center;gap:13px;text-align:left;font-family:var(--f-body);font-weight:700;font-size:16px;color:var(--ink);
+  background:#fff;border:2px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;transition:transform .08s,border-color .15s,background .15s}
+.opt:hover:not([disabled]){border-color:var(--brand);transform:translateX(3px)}
+.opt[disabled]{cursor:default}
+.opt .key{flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-family:var(--f-display);font-weight:600;font-size:15px;color:var(--ink-soft);background:var(--paper);border:1px solid var(--line)}
+.opt .mk{margin-left:auto;font-family:var(--f-display);font-size:18px}
+.opt.correct{border-color:var(--green);background:#e9f9f1}
+.opt.correct .key{background:var(--green);color:#fff}
+.opt.wrong{border-color:var(--red);background:#fde8eb;animation:shake .4s}
+.opt.wrong .key{background:var(--red);color:#fff}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+.explain{display:none;margin-top:16px;padding:13px 15px;border-radius:13px;background:#fff8e6;border:1px solid #ffe6ad;
+  font-weight:600;font-size:14.5px;line-height:1.5;color:#5a4413}
+.explain.show{display:block;animation:rise .3s both}
+.explain b{color:#b45309}
+#q-next{display:none;margin-top:14px}
+#q-next.show{display:block;animation:rise .3s both}
 
 /* ---------- results ---------- */
 .res{text-align:center}
-.verdict{font-family:var(--font-display);font-size:clamp(40px,11vw,56px);line-height:1;margin-bottom:4px}
-.verdict.win{color:var(--lime);text-shadow:0 0 40px rgba(182,255,59,.4)}
-.verdict.lose{color:var(--magenta)}
-.verdict.draw{color:var(--cyan)}
-.verdict.solo{background:linear-gradient(92deg,var(--cyan),var(--lime));-webkit-background-clip:text;background-clip:text;color:transparent}
-.scoreline{font-family:var(--font-display);font-size:64px;line-height:1;margin:14px 0 4px}
-.scoreline small{font-size:26px;color:var(--muted)}
-.subtle{color:var(--muted);font-weight:700;margin-bottom:18px}
+.rank{font-family:var(--f-display);font-weight:600;font-size:15px;color:var(--ink-soft);margin-bottom:2px}
+.verdict{font-family:var(--f-display);font-weight:700;font-size:clamp(36px,10vw,50px);line-height:1.02;margin-bottom:2px}
+.verdict.win{color:var(--green)}.verdict.lose{color:var(--coral)}.verdict.draw{color:var(--brand)}
+.verdict.solo{background:linear-gradient(95deg,var(--brand),var(--coral));-webkit-background-clip:text;background-clip:text;color:transparent}
+.scoreline{font-family:var(--f-display);font-weight:700;font-size:60px;line-height:1;margin:12px 0 2px;color:var(--ink)}
+.scoreline small{font-size:24px;color:var(--ink-soft)}
+.subtle{color:var(--ink-soft);font-weight:700;margin-bottom:8px}
+.minis{display:flex;justify-content:center;gap:18px;margin:10px 0 16px;font-weight:800;font-size:13px;color:var(--ink-soft)}
+.minis span b{font-family:var(--f-display);font-weight:600;color:var(--ink);font-size:18px;display:block}
 
-.compare{display:flex;flex-direction:column;gap:12px;margin:18px 0}
+.compare{display:flex;flex-direction:column;gap:12px;margin:6px 0 16px}
 .cmp{text-align:left}
 .cmp .top{display:flex;justify-content:space-between;font-weight:800;font-size:14px;margin-bottom:6px}
-.cmp .top .who{display:flex;align-items:center;gap:7px}
-.cmp .top .pts{font-family:var(--font-display);font-size:16px}
-.bar{height:14px;background:rgba(0,0,0,.3);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
-.bar i{display:block;height:100%;border-radius:999px;width:0;transition:width .9s cubic-bezier(.2,.8,.2,1)}
-.cmp.me .pts{color:var(--cyan)} .cmp.me .bar i{background:linear-gradient(90deg,var(--cyan),var(--lime))}
-.cmp.them .pts{color:var(--magenta)} .cmp.them .bar i{background:linear-gradient(90deg,var(--magenta),#ff8fcb)}
+.cmp .pts{font-family:var(--f-display);font-weight:600;font-size:16px}
+.bar{height:14px;background:var(--paper);border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:999px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.cmp.me .pts{color:var(--brand)}.cmp.me .bar i{background:linear-gradient(90deg,var(--brand),#5b7bff)}
+.cmp.them .pts{color:var(--coral)}.cmp.them .bar i{background:linear-gradient(90deg,var(--coral),#ff8a99)}
 
-.streakbox{display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(255,196,61,.1);border:1px solid rgba(255,196,61,.3);border-radius:14px;padding:12px;margin-bottom:18px;font-weight:800}
-.streakbox .f{font-size:24px}
-.streakbox b{font-family:var(--font-display);color:var(--amber);font-size:22px}
+.streakbox{display:flex;align-items:center;justify-content:center;gap:9px;background:#fff3d6;border:1px solid #ffe0a3;
+  border-radius:13px;padding:11px;margin-bottom:16px;font-weight:800;color:#5a4413}
+.streakbox b{font-family:var(--f-display);font-weight:600;color:#b45309;font-size:21px}
+.streakbox .fl{font-size:22px;animation:flick 1.1s ease-in-out infinite}
+@keyframes flick{50%{transform:scale(1.15) rotate(-4deg)}}
 
-/* share box */
-.sharebox{margin-top:14px;display:none}
-.sharebox.show{display:block;animation:rise .35s both}
+.sharebox{margin-top:13px;display:none}
+.sharebox.show{display:block;animation:rise .3s both}
 .linkrow{display:flex;gap:8px;margin-top:8px}
-.linkrow input{font-size:13px;font-weight:600;color:var(--muted)}
-.copybtn{flex:none;font-family:var(--font-display);font-size:14px;color:#04121f;background:var(--lime);border:none;border-radius:12px;padding:0 16px;cursor:pointer}
+.linkrow input{font-size:13px;font-weight:600;color:var(--ink-soft)}
+.copybtn{flex:none;font-family:var(--f-display);font-weight:600;font-size:14px;color:#fff;background:var(--green);border:none;border-radius:12px;padding:0 16px;cursor:pointer}
 .copybtn:active{transform:translateY(2px)}
-.copyhint{font-size:12.5px;color:var(--muted);margin-top:8px;text-align:center}
+.copyhint{font-size:12.5px;color:var(--ink-soft);margin-top:8px}
 
-/* loader */
-.loader{text-align:center;padding:40px 10px}
-.spinner{width:46px;height:46px;border-radius:50%;border:5px solid rgba(255,255,255,.12);border-top-color:var(--cyan);margin:0 auto 16px;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loader p{color:var(--muted);font-weight:800}
-
-.footnote{text-align:center;color:var(--muted);font-size:12px;margin-top:18px;opacity:.7}
+/* ---------- footer ---------- */
+.footer{margin-top:18px;text-align:center;font-size:12.5px;color:var(--ink-soft);font-weight:600;line-height:1.6;
+  padding-top:14px}
+.footer a{color:var(--brand);font-weight:800;text-decoration:none;border-bottom:1.5px dotted var(--brand)}
+.footer a:hover{color:var(--brand-dk)}
+.footer .made{font-family:var(--f-display);font-weight:600;color:var(--ink)}
 
 /* confetti */
-.confetti{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:50;animation:fall 2.3s ease-in forwards}
-@keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.9}}
+.confetti{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:60;animation:fall 2.4s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(560deg);opacity:.85}}
 
 @media (prefers-reduced-motion: reduce){
-  *{animation-duration:.001s !important;transition-duration:.05s !important}
-  .confetti{display:none}
+  *{animation-duration:.001s !important;transition-duration:.06s !important}
+  .confetti,.deco span{display:none}
 }
 </style>
 </head>
 <body>
+<div class="deco"><span></span><span></span><span></span><span></span></div>
+
 <div class="app">
+
+  <!-- top bar -->
+  <div class="bar">
+    <button class="mark" onclick="goHome()" aria-label="Quiz Gyan home">
+      <span class="tile">💡</span>
+      <span class="word">Quiz <b>Gyan</b></span>
+    </button>
+    <button class="icon-btn" id="muteBtn" onclick="toggleMute()" aria-label="Toggle sound">🔊</button>
+  </div>
 
   <!-- ============ HOME ============ -->
   <section id="screen-home" class="screen">
-    <div class="brand">
-      <div class="logo">QUIZ CLASH</div>
-      <span class="badge">⚛ SCIENCE</span>
+    <div class="hero">
+      <div class="big">Quiz <b>Gyan</b></div>
+      <span class="pill">⚛ SCIENCE EDITION</span>
+      <p class="sub">Duel your friends. Learn from every question. Climb the streak!</p>
     </div>
-    <p class="tagline">Pick your battle. Beat your friends. Build your streak.</p>
 
     <div class="card">
       <label class="fld" for="name">Your name</label>
-      <input type="text" id="name" maxlength="14" placeholder="e.g. Aarav" autocomplete="off" />
+      <input type="text" id="name" maxlength="14" placeholder="e.g. Aftab" autocomplete="off" />
 
       <label class="fld" style="margin-top:16px">Difficulty</label>
       <div class="seg" id="diff">
@@ -259,7 +255,7 @@ input[type=text]:focus{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(54,230
       </div>
 
       <label class="fld">Questions</label>
-      <div class="seg" id="amount">
+      <div class="seg warm" id="amount">
         <button data-v="5">5</button>
         <button data-v="7" class="on">7</button>
         <button data-v="10">10</button>
@@ -270,73 +266,74 @@ input[type=text]:focus{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(54,230
       <div class="stats">
         <div class="stat"><div class="n" id="s-games">0</div><div class="l">Battles</div></div>
         <div class="stat"><div class="n" id="s-wins">0</div><div class="l">Wins</div></div>
-        <div class="stat flame"><div class="n" id="s-streak">0</div><div class="l">🔥 Streak</div></div>
-        <div class="stat"><div class="n" id="s-best">0</div><div class="l">Best</div></div>
+        <div class="stat fire"><div class="n" id="s-streak">0</div><div class="l">🔥 Streak</div></div>
+        <div class="stat"><div class="n" id="s-best">0</div><div class="l">🏅 Best</div></div>
       </div>
 
       <details class="how">
         <summary>❔ How does it work?</summary>
-        <p>Play a round to set your score, then tap <b>Challenge a friend</b> — you'll get a link that holds your exact questions and score. Send it anywhere. When your friend opens it, they face the same questions and find out who won. Win a duel and your 🔥 streak grows!</p>
+        <p>Play a round to set your score, then tap <b>Challenge a friend</b> — you get a link that holds your exact questions and score. Send it anywhere. When your friend opens it, they face the same questions and find out who won. Win duels to grow your 🔥 streak. After every question you'll see a quick explanation, so you learn while you play!</p>
       </details>
     </div>
-    <p class="footnote">Questions from the Open Trivia DB · works offline with a built-in set</p>
   </section>
 
   <!-- ============ CHALLENGE INTRO ============ -->
-  <section id="screen-challenge" class="screen card hidden vs-intro">
+  <section id="screen-challenge" class="screen card hidden vs">
     <div class="swords">⚔️</div>
-    <div class="challenger"><b id="ch-name">Someone</b><br>challenges you!</div>
+    <h2><b id="ch-name">Someone</b><br>challenges you!</h2>
     <p class="target"><span id="ch-count">7</span> Science questions · beat their score of <span class="beat" id="ch-score">0/0</span></p>
     <div style="margin:18px 0 6px">
       <label class="fld" for="name2" style="text-align:center">Your name</label>
       <input type="text" id="name2" maxlength="14" placeholder="e.g. Diya" autocomplete="off" />
     </div>
-    <button class="btn pink" onclick="acceptChallenge()">🔥 ACCEPT CHALLENGE</button>
+    <button class="btn coral" onclick="acceptChallenge()">🔥 ACCEPT CHALLENGE</button>
     <button class="btn ghost row" onclick="goHome()">Play my own instead</button>
-  </section>
-
-  <!-- ============ LOADER ============ -->
-  <section id="screen-loading" class="screen card hidden">
-    <div class="loader">
-      <div class="spinner"></div>
-      <p id="load-msg">Pulling fresh questions…</p>
-    </div>
   </section>
 
   <!-- ============ QUIZ ============ -->
   <section id="screen-quiz" class="screen card hidden">
-    <div class="qtop">
-      <span class="qcount" id="q-count">Question 1 / 7</span>
-      <span class="qscore" id="q-score">★ 0</span>
+    <div class="q-head">
+      <div class="dots" id="q-dots"></div>
+      <div class="q-meta">
+        <span class="combo" id="q-combo">🔥 x2</span>
+        <span class="scorechip" id="q-score">✦ 0</span>
+      </div>
     </div>
-    <div class="timerwrap"><div class="timerbar" id="timerbar"></div></div>
-    <div class="question" id="q-text">…</div>
+    <div class="timerwrap"><div id="timerbar"></div></div>
+    <div class="q-text" id="q-text">…</div>
     <div class="opts" id="q-opts"></div>
+    <div class="explain" id="q-explain"></div>
+    <button class="btn next" id="q-next" onclick="next()">Next →</button>
   </section>
 
   <!-- ============ RESULTS ============ -->
   <section id="screen-results" class="screen card hidden res">
+    <div class="rank" id="r-rank"></div>
     <div class="verdict" id="r-verdict">DONE</div>
     <div class="scoreline" id="r-score">0<small>/0</small></div>
     <p class="subtle" id="r-sub"></p>
 
+    <div class="minis" id="r-minis">
+      <span>Accuracy<b id="r-acc">0%</b></span>
+      <span>Best combo<b id="r-combo">0🔥</b></span>
+    </div>
+
     <div class="compare hidden" id="r-compare">
       <div class="cmp me">
-        <div class="top"><span class="who">🟦 <span id="r-me-name">You</span></span><span class="pts" id="r-me-pts">0</span></div>
+        <div class="top"><span id="r-me-name">You</span><span class="pts" id="r-me-pts">0</span></div>
         <div class="bar"><i id="r-me-bar"></i></div>
       </div>
       <div class="cmp them">
-        <div class="top"><span class="who">🟪 <span id="r-them-name">Rival</span></span><span class="pts" id="r-them-pts">0</span></div>
+        <div class="top"><span id="r-them-name">Rival</span><span class="pts" id="r-them-pts">0</span></div>
         <div class="bar"><i id="r-them-bar"></i></div>
       </div>
     </div>
 
     <div class="streakbox hidden" id="r-streakbox">
-      <span class="f">🔥</span><span>Win streak: <b id="r-streak">0</b></span>
+      <span class="fl">🔥</span><span>Win streak: <b id="r-streak">0</b></span>
     </div>
 
-    <button class="btn pink" onclick="shareChallenge()">⚔ CHALLENGE A FRIEND</button>
-
+    <button class="btn coral" onclick="shareChallenge()">⚔ CHALLENGE A FRIEND</button>
     <div class="sharebox" id="sharebox">
       <div class="linkrow">
         <input type="text" id="sharelink" readonly />
@@ -344,369 +341,437 @@ input[type=text]:focus{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(54,230
       </div>
       <p class="copyhint" id="copyhint">Send this link to a friend so they can take you on 👆</p>
     </div>
-
     <button class="btn ghost row" onclick="playAgain()">↻ Play again</button>
     <button class="btn ghost row" onclick="goHome()">🏠 Home</button>
   </section>
 
-  <p class="footnote" id="brandfoot" style="margin-top:22px">Quiz Clash · a student-built study game</p>
+  <!-- ============ FOOTER (always visible) ============ -->
+  <footer class="footer">
+    <div class="made">Quiz Gyan — built by Aftabuddin</div>
+    a student at <a href="https://umeed.org.in/" target="_blank" rel="noopener">Umeed Global School</a>
+  </footer>
 </div>
 
 <script>
 /* ============================================================
-   1) BUILT-IN SCIENCE QUESTION BANK (offline fallback)
-   Used automatically if the Open Trivia DB can't be reached.
-   You can add your own syllabus questions right here.
+   1) THE SCIENCE QUESTION BANK — 150+ questions with explanations
+      d = difficulty, q = question, a = correct answer,
+      w = three wrong answers, e = short explanation.
+      Add your own anytime — just copy a line and edit it.
    ============================================================ */
-const SCIENCE_BANK = [
-  // ---- easy ----
-  {d:"easy", q:"What gas do plants absorb from the air during photosynthesis?", correct:"Carbon dioxide", wrong:["Oxygen","Nitrogen","Hydrogen"]},
-  {d:"easy", q:"What is the centre of an atom called?", correct:"Nucleus", wrong:["Electron","Orbit","Shell"]},
-  {d:"easy", q:"Which planet is known as the Red Planet?", correct:"Mars", wrong:["Venus","Jupiter","Mercury"]},
-  {d:"easy", q:"H₂O is the chemical formula for…", correct:"Water", wrong:["Salt","Oxygen","Air"]},
-  {d:"easy", q:"Which organ pumps blood around the body?", correct:"Heart", wrong:["Lungs","Liver","Brain"]},
-  {d:"easy", q:"What force pulls objects towards the Earth?", correct:"Gravity", wrong:["Magnetism","Friction","Tension"]},
-  {d:"easy", q:"How many legs does an insect have?", correct:"Six", wrong:["Four","Eight","Ten"]},
-  {d:"easy", q:"Which part of a plant makes seeds?", correct:"Flower", wrong:["Root","Leaf","Stem"]},
-  // ---- medium ----
-  {d:"medium", q:"What is the chemical symbol for gold?", correct:"Au", wrong:["Gd","Go","Ag"]},
-  {d:"medium", q:"Which part of a plant cell carries out photosynthesis?", correct:"Chloroplast", wrong:["Nucleus","Vacuole","Ribosome"]},
-  {d:"medium", q:"What type of energy does a moving object have?", correct:"Kinetic energy", wrong:["Potential energy","Chemical energy","Sound energy"]},
-  {d:"medium", q:"Sound cannot travel through which of these?", correct:"A vacuum", wrong:["Water","Air","Steel"]},
-  {d:"medium", q:"Which gas makes up most of Earth's atmosphere?", correct:"Nitrogen", wrong:["Oxygen","Carbon dioxide","Argon"]},
-  {d:"medium", q:"The change of a liquid into a gas is called…", correct:"Evaporation", wrong:["Condensation","Freezing","Melting"]},
-  {d:"medium", q:"The 'powerhouse' of the cell is the…", correct:"Mitochondrion", wrong:["Nucleus","Ribosome","Cell wall"]},
-  // ---- hard ----
-  {d:"hard", q:"What is the pH value of a neutral solution?", correct:"7", wrong:["0","14","1"]},
-  {d:"hard", q:"Who proposed the three laws of motion?", correct:"Isaac Newton", wrong:["Albert Einstein","Galileo Galilei","Nikola Tesla"]},
-  {d:"hard", q:"Roughly, what is the speed of light in a vacuum?", correct:"300,000 km/s", wrong:["150,000 km/s","3,000 km/s","1,080 km/s"]},
-  {d:"hard", q:"Which blood cells help fight infection?", correct:"White blood cells", wrong:["Red blood cells","Platelets","Plasma"]},
-  {d:"hard", q:"What is the chemical formula for table salt?", correct:"NaCl", wrong:["KCl","NaOH","HCl"]},
+const QUESTIONS = [
+/* ---------------- EASY (50) ---------------- */
+{d:"easy",q:"What gas do plants release during photosynthesis?",a:"Oxygen",w:["Carbon dioxide","Nitrogen","Hydrogen"],e:"Plants take in carbon dioxide and give out oxygen during photosynthesis."},
+{d:"easy",q:"Which organ pumps blood around your body?",a:"Heart",w:["Lungs","Brain","Liver"],e:"The heart is a muscle that pumps blood to every part of the body."},
+{d:"easy",q:"How many bones are in the adult human body?",a:"206",w:["201","215","180"],e:"An adult skeleton has 206 bones; babies have more that fuse as they grow."},
+{d:"easy",q:"Which part of a plant absorbs water from the soil?",a:"Roots",w:["Leaves","Flower","Stem"],e:"Roots take up water and minerals from the soil."},
+{d:"easy",q:"What do we call animals that eat only plants?",a:"Herbivores",w:["Carnivores","Omnivores","Predators"],e:"Herbivores such as cows and deer eat only plants."},
+{d:"easy",q:"Which organ helps you breathe?",a:"Lungs",w:["Stomach","Kidney","Heart"],e:"The lungs take in oxygen and remove carbon dioxide."},
+{d:"easy",q:"How many legs does an insect have?",a:"Six",w:["Four","Eight","Ten"],e:"All insects have six legs and three body parts."},
+{d:"easy",q:"What is the green colouring in plant leaves called?",a:"Chlorophyll",w:["Carotene","Melanin","Haemoglobin"],e:"Chlorophyll is green and captures sunlight for photosynthesis."},
+{d:"easy",q:"Which sense organ do you use to smell?",a:"Nose",w:["Ear","Eye","Tongue"],e:"The nose detects smells carried in the air."},
+{d:"easy",q:"What do caterpillars turn into?",a:"Butterflies",w:["Spiders","Bees","Ants"],e:"A caterpillar changes into a butterfly through metamorphosis."},
+{d:"easy",q:"What do bees collect from flowers to make honey?",a:"Nectar",w:["Water","Soil","Tree sap"],e:"Bees gather sweet nectar from flowers and turn it into honey."},
+{d:"easy",q:"Which part of the body controls everything you do?",a:"Brain",w:["Heart","Lungs","Liver"],e:"The brain is the control centre of the body."},
+{d:"easy",q:"Plants make their own food in a process called…?",a:"Photosynthesis",w:["Respiration","Digestion","Evaporation"],e:"Photosynthesis uses sunlight, water and carbon dioxide to make food."},
+{d:"easy",q:"What do we call animals that eat both plants and animals?",a:"Omnivores",w:["Herbivores","Carnivores","Insectivores"],e:"Omnivores like humans and bears eat both plants and meat."},
+{d:"easy",q:"What is H₂O commonly known as?",a:"Water",w:["Salt","Air","Oxygen"],e:"H₂O means two hydrogen atoms joined to one oxygen atom — water."},
+{d:"easy",q:"What are the three common states of matter?",a:"Solid, liquid, gas",w:["Hot, cold, warm","Hard, soft, runny","Big, small, medium"],e:"Matter normally exists as solids, liquids and gases."},
+{d:"easy",q:"Ice is the solid form of…?",a:"Water",w:["Air","Oil","Milk"],e:"When water freezes it becomes solid ice."},
+{d:"easy",q:"Which gas do humans need to breathe to stay alive?",a:"Oxygen",w:["Carbon dioxide","Nitrogen","Helium"],e:"Our bodies use oxygen to release energy from food."},
+{d:"easy",q:"What does water turn into when heated strongly?",a:"Steam",w:["Ice","Snow","Stone"],e:"Heating water turns it into water vapour, which we see as steam."},
+{d:"easy",q:"Salt dissolving in water makes a…?",a:"Solution",w:["Solid","Gas","Pile of stones"],e:"Salt dissolves completely in water to form a solution."},
+{d:"easy",q:"What force pulls objects towards the Earth?",a:"Gravity",w:["Magnetism","Friction","A push"],e:"Gravity is the force that pulls everything towards the Earth."},
+{d:"easy",q:"The Sun gives us light and…?",a:"Heat",w:["Sound","Rain","Wind"],e:"The Sun is our main source of light and heat energy."},
+{d:"easy",q:"Which of these makes its own light?",a:"The Sun",w:["The Moon","A mirror","A wall"],e:"The Sun makes its own light; the Moon only reflects sunlight."},
+{d:"easy",q:"A push or a pull is called a…?",a:"Force",w:["Speed","Mass","Weight"],e:"A force is any push or pull acting on an object."},
+{d:"easy",q:"Sound is made when objects…?",a:"Vibrate",w:["Glow","Melt","Freeze"],e:"Vibrations create sound waves that travel to our ears."},
+{d:"easy",q:"Which travels faster?",a:"Light",w:["Sound","Both the same","Neither"],e:"Light is far faster than sound — that's why we see lightning before we hear thunder."},
+{d:"easy",q:"A magnet attracts objects made of…?",a:"Iron",w:["Wood","Plastic","Glass"],e:"Magnets attract magnetic metals like iron, nickel and cobalt."},
+{d:"easy",q:"What do we use to measure temperature?",a:"Thermometer",w:["Ruler","Clock","Weighing scale"],e:"A thermometer measures how hot or cold something is."},
+{d:"easy",q:"Which planet do we live on?",a:"Earth",w:["Mars","Venus","Jupiter"],e:"Earth is the third planet from the Sun and the only one known to have life."},
+{d:"easy",q:"Which planet is called the Red Planet?",a:"Mars",w:["Venus","Saturn","Mercury"],e:"Mars looks red because of rusty, iron-rich dust on its surface."},
+{d:"easy",q:"What is the nearest star to Earth?",a:"The Sun",w:["The Moon","Polaris","Sirius"],e:"The Sun is a star and the closest one to us."},
+{d:"easy",q:"Which gas makes up most of the air we breathe?",a:"Nitrogen",w:["Oxygen","Carbon dioxide","Hydrogen"],e:"About 78% of the air around us is nitrogen."},
+{d:"easy",q:"What do we call frozen water that falls from the sky?",a:"Snow",w:["Rain","Fog","Dew"],e:"Snow forms when water vapour freezes into ice crystals."},
+{d:"easy",q:"How many planets are in our Solar System?",a:"Eight",w:["Seven","Nine","Ten"],e:"There are eight planets since Pluto was reclassified as a dwarf planet."},
+{d:"easy",q:"The natural satellite of the Earth is the…?",a:"Moon",w:["Sun","Mars","A comet"],e:"The Moon orbits the Earth as its only natural satellite."},
+{d:"easy",q:"A scientist who studies stars and space is an…?",a:"Astronomer",w:["Biologist","Chemist","Geologist"],e:"Astronomers study planets, stars and galaxies."},
+{d:"easy",q:"Which body part helps you see?",a:"Eyes",w:["Ears","Nose","Skin"],e:"Eyes detect light and let us see the world."},
+{d:"easy",q:"What do plants need from the Sun to make food?",a:"Sunlight",w:["Soil","Wind","Sound"],e:"Sunlight gives the energy needed for photosynthesis."},
+{d:"easy",q:"Teeth are mainly used to…?",a:"Chew food",w:["Pump blood","Breathe","See"],e:"Teeth break food into smaller pieces for digestion."},
+{d:"easy",q:"Fish breathe using their…?",a:"Gills",w:["Lungs","Skin only","Nose"],e:"Gills let fish take in oxygen that is dissolved in water."},
+{d:"easy",q:"Which of these is a mammal?",a:"Whale",w:["Shark","Frog","Crocodile"],e:"Whales are mammals — warm-blooded animals that feed their young milk."},
+{d:"easy",q:"What do we call baby frogs?",a:"Tadpoles",w:["Larvae","Cubs","Chicks"],e:"Frogs begin life as tadpoles that live in water."},
+{d:"easy",q:"How many legs does a spider have?",a:"Eight",w:["Six","Four","Ten"],e:"Spiders are arachnids, and all arachnids have eight legs."},
+{d:"easy",q:"Which vitamin do we mainly get from sunlight?",a:"Vitamin D",w:["Vitamin C","Vitamin A","Vitamin K"],e:"Sunlight helps our skin make vitamin D."},
+{d:"easy",q:"Which of these is a liquid at room temperature?",a:"Water",w:["Iron","Wood","Ice"],e:"Water is a liquid at normal room temperature."},
+{d:"easy",q:"Food gives our bodies…?",a:"Energy",w:["Cold","Noise","Light"],e:"Food is the fuel that gives our bodies energy."},
+{d:"easy",q:"A torch makes light using energy from a…?",a:"Battery",w:["Magnet","Sound","Bucket of water"],e:"A torch uses electrical energy stored in its battery."},
+{d:"easy",q:"When you mix two things without a chemical reaction you get a…?",a:"Mixture",w:["Element","Atom","Pure metal"],e:"A mixture is made of substances simply combined together."},
+{d:"easy",q:"Which part of a plant usually grows into a fruit-bearing part?",a:"Flower",w:["Root","Leaf","Stem"],e:"Flowers contain the parts that make seeds and fruit."},
+{d:"easy",q:"What do we call the layer of gases around the Earth?",a:"Atmosphere",w:["Crust","Ocean","Core"],e:"The atmosphere is the blanket of gases surrounding our planet."},
+
+/* ---------------- MEDIUM (50) ---------------- */
+{d:"medium",q:"The 'powerhouse' of the cell is the…?",a:"Mitochondrion",w:["Nucleus","Ribosome","Cell wall"],e:"Mitochondria release energy for the cell, so they are called its powerhouse."},
+{d:"medium",q:"Which part of a plant cell carries out photosynthesis?",a:"Chloroplast",w:["Nucleus","Vacuole","Mitochondrion"],e:"Chloroplasts contain chlorophyll and make food using sunlight."},
+{d:"medium",q:"Red blood cells carry which gas around the body?",a:"Oxygen",w:["Nitrogen","Helium","Hydrogen"],e:"Haemoglobin in red blood cells carries oxygen to the body's cells."},
+{d:"medium",q:"Which blood cells help fight infection?",a:"White blood cells",w:["Red blood cells","Platelets","Plasma"],e:"White blood cells are part of the body's defence against germs."},
+{d:"medium",q:"Plants lose water through their leaves in a process called…?",a:"Transpiration",w:["Respiration","Digestion","Pollination"],e:"Transpiration is the loss of water vapour from a plant's leaves."},
+{d:"medium",q:"Which organ filters waste from the blood?",a:"Kidneys",w:["Heart","Lungs","Stomach"],e:"The kidneys filter waste and extra water, making urine."},
+{d:"medium",q:"The smallest unit of life is the…?",a:"Cell",w:["Atom","Organ","Tissue"],e:"All living things are made of cells, the basic unit of life."},
+{d:"medium",q:"What do we call animals without a backbone?",a:"Invertebrates",w:["Vertebrates","Mammals","Reptiles"],e:"Invertebrates, like insects and worms, have no backbone."},
+{d:"medium",q:"Which gas do plants absorb that animals breathe out?",a:"Carbon dioxide",w:["Oxygen","Nitrogen","Hydrogen"],e:"Plants take in the carbon dioxide that animals release."},
+{d:"medium",q:"The food pipe from the mouth to the stomach is the…?",a:"Oesophagus",w:["Trachea","Aorta","Larynx"],e:"The oesophagus pushes food down to the stomach."},
+{d:"medium",q:"Photosynthesis mainly takes place in a plant's…?",a:"Leaves",w:["Roots","Flowers","Stem"],e:"Leaves are the main food factories of a plant."},
+{d:"medium",q:"What is the chemical symbol for gold?",a:"Au",w:["Gd","Go","Ag"],e:"Gold's symbol Au comes from its Latin name 'aurum'."},
+{d:"medium",q:"What is the chemical symbol for oxygen?",a:"O",w:["Ox","Og","On"],e:"The element oxygen is shown by the single letter O."},
+{d:"medium",q:"The chemical formula for table salt is…?",a:"NaCl",w:["KCl","NaOH","HCl"],e:"Table salt is sodium (Na) joined with chlorine (Cl)."},
+{d:"medium",q:"Which gas turns limewater milky?",a:"Carbon dioxide",w:["Oxygen","Hydrogen","Nitrogen"],e:"Carbon dioxide turns clear limewater cloudy or milky."},
+{d:"medium",q:"Acids turn blue litmus paper…?",a:"Red",w:["Green","Yellow","Black"],e:"Acids turn blue litmus red; bases turn red litmus blue."},
+{d:"medium",q:"A gas cooling and turning into a liquid is called…?",a:"Condensation",w:["Evaporation","Melting","Freezing"],e:"Condensation happens when a gas cools and becomes a liquid."},
+{d:"medium",q:"A liquid changing into a gas is called…?",a:"Evaporation",w:["Condensation","Freezing","Melting"],e:"Evaporation turns a liquid into a gas or vapour."},
+{d:"medium",q:"Which of these is a pure substance?",a:"Gold",w:["Sea water","Air","Soil"],e:"Gold is an element and pure, while the others are mixtures."},
+{d:"medium",q:"Iron rusts when it reacts with oxygen and…?",a:"Water",w:["Sound","Light","Sand"],e:"Iron needs both oxygen and moisture (water) to rust."},
+{d:"medium",q:"What type of energy does a moving object have?",a:"Kinetic energy",w:["Potential energy","Chemical energy","Sound energy"],e:"Kinetic energy is the energy of motion."},
+{d:"medium",q:"Energy stored in a stretched rubber band is…?",a:"Potential energy",w:["Kinetic energy","Heat energy","Light energy"],e:"Stored or position energy is called potential energy."},
+{d:"medium",q:"Sound cannot travel through a…?",a:"Vacuum",w:["Solid","Liquid","Gas"],e:"Sound needs particles to travel, so it cannot pass through empty space."},
+{d:"medium",q:"Light bouncing back off a surface is called…?",a:"Reflection",w:["Refraction","Absorption","Diffraction"],e:"Light reflects, or bounces back, off surfaces like mirrors."},
+{d:"medium",q:"A device that changes electrical energy into light is a…?",a:"Bulb",w:["Battery","Switch","Wire"],e:"A bulb converts electrical energy into light and a little heat."},
+{d:"medium",q:"The unit of force is the…?",a:"Newton",w:["Joule","Watt","Volt"],e:"Force is measured in newtons (N), named after Isaac Newton."},
+{d:"medium",q:"Like poles of two magnets…?",a:"Repel each other",w:["Attract each other","Do nothing","Melt"],e:"Like poles push apart; unlike poles attract."},
+{d:"medium",q:"An echo is caused by the…?",a:"Reflection of sound",w:["Refraction of light","Bending of air","Absorption of light"],e:"An echo is sound that has bounced (reflected) back to you."},
+{d:"medium",q:"Electric current flows easily through a…?",a:"Conductor",w:["Insulator","Vacuum","Plastic"],e:"Conductors like metals let electricity flow through them."},
+{d:"medium",q:"Which is the largest planet in our Solar System?",a:"Jupiter",w:["Saturn","Earth","Neptune"],e:"Jupiter is the biggest planet — a giant ball of gas."},
+{d:"medium",q:"Which planet is closest to the Sun?",a:"Mercury",w:["Venus","Earth","Mars"],e:"Mercury is the innermost and closest planet to the Sun."},
+{d:"medium",q:"The Earth takes how long to revolve once around the Sun?",a:"One year",w:["One day","One month","One week"],e:"One full orbit of the Sun takes about 365 days — a year."},
+{d:"medium",q:"Day and night are caused by the Earth's…?",a:"Rotation",w:["Revolution","Tilt only","Gravity"],e:"The Earth spins once a day, giving us day and night."},
+{d:"medium",q:"Which layer of the Earth do we live on?",a:"Crust",w:["Mantle","Outer core","Inner core"],e:"We live on the crust, the Earth's thin outer layer."},
+{d:"medium",q:"A scientist who studies rocks is a…?",a:"Geologist",w:["Botanist","Zoologist","Astronomer"],e:"Geologists study rocks, soil and the Earth's structure."},
+{d:"medium",q:"The water cycle is powered mainly by the…?",a:"Sun",w:["Moon","Wind only","Rivers"],e:"The Sun's heat evaporates water, driving the whole water cycle."},
+{d:"medium",q:"Which planet is famous for its bright rings?",a:"Saturn",w:["Mars","Mercury","Venus"],e:"Saturn has spectacular rings made of ice and rock."},
+{d:"medium",q:"Photosynthesis produces oxygen and…?",a:"Glucose (food)",w:["Salt","Protein","Plastic"],e:"Plants make glucose (a sugar) and release oxygen."},
+{d:"medium",q:"The tough outer covering of an insect is its…?",a:"Exoskeleton",w:["Bone","Cartilage","Shell of calcium"],e:"Insects have a hard outer skeleton called an exoskeleton."},
+{d:"medium",q:"Which part of a flower develops into a fruit?",a:"Ovary",w:["Petal","Stamen","Sepal"],e:"After fertilisation, the ovary grows into a fruit."},
+{d:"medium",q:"Yeast, used in baking, is a type of…?",a:"Fungus",w:["Bacterium","Plant","Animal"],e:"Yeast is a microscopic fungus used in baking and brewing."},
+{d:"medium",q:"Milk is an example of a…?",a:"Mixture",w:["Pure element","Single compound","Metal"],e:"Milk is a mixture of water, fats, proteins and sugars."},
+{d:"medium",q:"Which metal is a liquid at room temperature?",a:"Mercury",w:["Iron","Gold","Copper"],e:"Mercury is the only common metal that is liquid at room temperature."},
+{d:"medium",q:"The smallest particle of an element is an…?",a:"Atom",w:["Molecule","Cell","Crystal"],e:"An atom is the smallest particle of an element."},
+{d:"medium",q:"Friction always acts…?",a:"Against motion",w:["With motion","Upwards only","Downwards only"],e:"Friction opposes the movement between two surfaces."},
+{d:"medium",q:"The unit of energy is the…?",a:"Joule",w:["Newton","Watt","Ampere"],e:"Energy is measured in joules (J)."},
+{d:"medium",q:"A simple machine with a wheel and rope used to lift loads is a…?",a:"Pulley",w:["Lever","Wedge","Screw"],e:"A pulley uses a wheel and rope to make lifting easier."},
+{d:"medium",q:"Green plants are called 'producers' because they…?",a:"Make their own food",w:["Eat other animals","Break down waste","Eat plants"],e:"Producers make food by photosynthesis, starting every food chain."},
+{d:"medium",q:"Which gas is released by our body during breathing out?",a:"Carbon dioxide",w:["Oxygen","Nitrogen","Hydrogen"],e:"We breathe in oxygen and breathe out carbon dioxide."},
+{d:"medium",q:"Insects breathe through tiny holes called…?",a:"Spiracles",w:["Gills","Nostrils","Pores"],e:"Insects take in air through small openings called spiracles."},
+
+/* ---------------- HARD (50) ---------------- */
+{d:"hard",q:"What is the speed of light in a vacuum (approximately)?",a:"300,000 km/s",w:["30,000 km/s","3,000 km/s","1,080 km/s"],e:"Light travels about 300,000 kilometres every second in a vacuum."},
+{d:"hard",q:"Who proposed the three laws of motion?",a:"Isaac Newton",w:["Albert Einstein","Galileo Galilei","Nikola Tesla"],e:"Newton's three laws of motion were published in 1687."},
+{d:"hard",q:"The SI unit of electric current is the…?",a:"Ampere",w:["Volt","Ohm","Watt"],e:"Electric current is measured in amperes (A)."},
+{d:"hard",q:"The unit of electrical resistance is the…?",a:"Ohm",w:["Volt","Watt","Joule"],e:"Resistance is measured in ohms (Ω)."},
+{d:"hard",q:"Electrical power is measured in…?",a:"Watts",w:["Joules","Newtons","Amperes"],e:"Power, the rate of using energy, is measured in watts (W)."},
+{d:"hard",q:"Which mirror is used in car headlights to make a beam?",a:"Concave",w:["Convex","Plane","Cylindrical"],e:"A concave mirror reflects light into a focused beam."},
+{d:"hard",q:"The frequency of sound is measured in…?",a:"Hertz",w:["Decibels","Watts","Newtons"],e:"Frequency, the vibrations per second, is measured in hertz (Hz)."},
+{d:"hard",q:"The loudness of sound is measured in…?",a:"Decibels",w:["Hertz","Joules","Volts"],e:"Loudness is measured in decibels (dB)."},
+{d:"hard",q:"Which type of lens is thicker in the middle?",a:"Convex",w:["Concave","Plane","Hollow"],e:"A convex (converging) lens is thicker in the centre."},
+{d:"hard",q:"How many colours make up white light (a rainbow)?",a:"Seven",w:["Five","Three","Ten"],e:"White light splits into seven colours: red, orange, yellow, green, blue, indigo, violet."},
+{d:"hard",q:"Gravity on the Moon is about how much of Earth's?",a:"One-sixth",w:["The same","Double","Zero"],e:"The Moon's gravity is roughly 1/6th of Earth's, so you feel lighter there."},
+{d:"hard",q:"Acceleration is the rate of change of…?",a:"Velocity",w:["Distance","Mass","Force"],e:"Acceleration measures how quickly velocity changes."},
+{d:"hard",q:"What is the pH of a neutral solution like pure water?",a:"7",w:["0","14","1"],e:"Pure water is neutral with a pH of 7; below 7 is acidic, above 7 is basic."},
+{d:"hard",q:"What is the chemical symbol for sodium?",a:"Na",w:["So","Sd","S"],e:"Sodium's symbol Na comes from its Latin name 'natrium'."},
+{d:"hard",q:"What is the chemical symbol for iron?",a:"Fe",w:["Ir","In","I"],e:"Iron's symbol Fe comes from the Latin 'ferrum'."},
+{d:"hard",q:"The chemical formula for carbon dioxide is…?",a:"CO₂",w:["CO","C₂O","CaO"],e:"Carbon dioxide has one carbon atom and two oxygen atoms."},
+{d:"hard",q:"How many electrons does a neutral hydrogen atom have?",a:"One",w:["Two","Zero","Eight"],e:"Hydrogen, the simplest atom, has one proton and one electron."},
+{d:"hard",q:"Which particle inside an atom has a negative charge?",a:"Electron",w:["Proton","Neutron","Nucleus"],e:"Electrons carry a negative charge; protons are positive."},
+{d:"hard",q:"Which particle inside an atom has no charge?",a:"Neutron",w:["Proton","Electron","Ion"],e:"Neutrons are neutral — they carry no electric charge."},
+{d:"hard",q:"Nitrogen makes up roughly what percent of Earth's air?",a:"78%",w:["50%","21%","90%"],e:"Air is about 78% nitrogen and 21% oxygen."},
+{d:"hard",q:"Baking soda is chemically known as…?",a:"Sodium bicarbonate",w:["Sodium chloride","Calcium carbonate","Sodium hydroxide"],e:"Baking soda is sodium bicarbonate (NaHCO₃)."},
+{d:"hard",q:"A solid changing directly into a gas is called…?",a:"Sublimation",w:["Evaporation","Condensation","Melting"],e:"Sublimation skips the liquid stage, like dry ice turning to gas."},
+{d:"hard",q:"Which acid gives lemons and oranges their sour taste?",a:"Citric acid",w:["Sulphuric acid","Hydrochloric acid","Acetic acid"],e:"Citrus fruits contain citric acid."},
+{d:"hard",q:"Which acid is present in vinegar?",a:"Acetic acid",w:["Citric acid","Nitric acid","Lactic acid"],e:"Vinegar contains acetic acid."},
+{d:"hard",q:"The basic unit of heredity passed from parents is the…?",a:"Gene",w:["Cell","Atom","Tissue"],e:"Genes carry the instructions passed from parents to children."},
+{d:"hard",q:"Which part of an animal cell holds the DNA?",a:"Nucleus",w:["Cytoplasm","Cell membrane","Vacuole"],e:"The nucleus stores the cell's genetic material (DNA)."},
+{d:"hard",q:"How many chambers does a human heart have?",a:"Four",w:["Two","Three","One"],e:"The human heart has four chambers: two atria and two ventricles."},
+{d:"hard",q:"The longest bone in the human body is the…?",a:"Femur (thigh bone)",w:["Humerus","Tibia","Spine"],e:"The femur in the thigh is the longest and strongest bone."},
+{d:"hard",q:"The pigment that carries oxygen in our blood is…?",a:"Haemoglobin",w:["Chlorophyll","Melanin","Insulin"],e:"Haemoglobin in red blood cells binds and carries oxygen."},
+{d:"hard",q:"Who is known as the 'Father of Genetics'?",a:"Gregor Mendel",w:["Charles Darwin","Louis Pasteur","Isaac Newton"],e:"Mendel discovered the rules of heredity using pea plants."},
+{d:"hard",q:"The study of living things is called…?",a:"Biology",w:["Geology","Chemistry","Physics"],e:"Biology is the science of life and living organisms."},
+{d:"hard",q:"Most colds and flu are caused by a…?",a:"Virus",w:["Bacterium","Fungus","Protozoan"],e:"Colds and flu are caused by viruses, not bacteria."},
+{d:"hard",q:"Which scientist discovered penicillin?",a:"Alexander Fleming",w:["Marie Curie","Isaac Newton","Charles Darwin"],e:"Fleming discovered the antibiotic penicillin in 1928."},
+{d:"hard",q:"How long does sunlight take to reach the Earth (approx)?",a:"About 8 minutes",w:["About 8 seconds","About 8 hours","Instantly"],e:"Sunlight takes roughly 8 minutes and 20 seconds to reach us."},
+{d:"hard",q:"Which is the brightest planet, often called the 'Evening Star'?",a:"Venus",w:["Mars","Mercury","Jupiter"],e:"Venus is the brightest planet, often seen at dusk or dawn."},
+{d:"hard",q:"Which is the hottest planet in the Solar System?",a:"Venus",w:["Mercury","Mars","Jupiter"],e:"Venus is hottest because its thick atmosphere traps heat, even though Mercury is closer to the Sun."},
+{d:"hard",q:"The strength of an earthquake is measured on the…?",a:"Richter scale",w:["Celsius scale","pH scale","Beaufort scale"],e:"The Richter scale measures the strength of earthquakes."},
+{d:"hard",q:"Which force keeps the planets orbiting the Sun?",a:"Gravity",w:["Friction","Magnetism","Tension"],e:"The Sun's gravity holds the planets in their orbits."},
+{d:"hard",q:"The Earth's axis is tilted at about…?",a:"23.5 degrees",w:["90 degrees","45 degrees","0 degrees"],e:"The 23.5° tilt of Earth's axis is what gives us the seasons."},
+{d:"hard",q:"A group of stars forming a pattern is called a…?",a:"Constellation",w:["Galaxy","Nebula","Comet"],e:"Constellations are recognisable star patterns, like Orion."},
+{d:"hard",q:"The boiling point of pure water at sea level is…?",a:"100°C",w:["0°C","90°C","120°C"],e:"Pure water boils at 100°C (212°F) at sea level."},
+{d:"hard",q:"The freezing point of water is…?",a:"0°C",w:["10°C","100°C","-100°C"],e:"Water freezes at 0°C (32°F)."},
+{d:"hard",q:"Which instrument measures atmospheric pressure?",a:"Barometer",w:["Thermometer","Anemometer","Hygrometer"],e:"A barometer measures air pressure and helps predict weather."},
+{d:"hard",q:"Which instrument measures wind speed?",a:"Anemometer",w:["Barometer","Thermometer","Compass"],e:"An anemometer measures how fast the wind is blowing."},
+{d:"hard",q:"Heat and light from the Sun reach the Earth mainly by…?",a:"Radiation",w:["Conduction","Convection","Sound"],e:"The Sun's energy travels through space to us by radiation."},
+{d:"hard",q:"Sound travels fastest through…?",a:"Solids",w:["Liquids","Gases","A vacuum"],e:"Sound moves fastest in solids because the particles are packed tightly."},
+{d:"hard",q:"Which scientist developed the theory of relativity?",a:"Albert Einstein",w:["Isaac Newton","Galileo Galilei","Stephen Hawking"],e:"Einstein proposed the theories of relativity, including E=mc²."},
+{d:"hard",q:"A substance that speeds up a reaction without being used up is a…?",a:"Catalyst",w:["Solvent","Solute","Mixture"],e:"A catalyst makes a reaction go faster but is not used up itself."},
+{d:"hard",q:"Which colour of light bends the most through a prism?",a:"Violet",w:["Red","Yellow","Green"],e:"Violet light bends the most and red light the least in a prism."},
+{d:"hard",q:"What is the chemical symbol for potassium?",a:"K",w:["Po","Pt","P"],e:"Potassium's symbol K comes from its Latin name 'kalium'."},
 ];
-const SCIENCE_CATEGORY = 17; // Open Trivia DB "Science & Nature"
-const TIME_PER_Q = 20;       // seconds
+const TIME_PER_Q = 20; // seconds to answer each question
 
 /* ============================================================
-   2) SMALL HELPERS
+   2) HELPERS
    ============================================================ */
 const $ = id => document.getElementById(id);
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=(Math.random()*(i+1))|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
 
-function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
-
-// Open Trivia DB returns HTML entities (&quot;, &#039;…) — turn them back into characters.
-function decodeHTML(s){const t=document.createElement('textarea');t.innerHTML=s;return t.value;}
-
-// URL-safe base64 (handles emoji / accents safely)
-function encodeState(obj){
-  const json=JSON.stringify(obj);
-  const b64=btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g,(_,p)=>String.fromCharCode(parseInt(p,16))));
-  return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-}
-function decodeState(str){
-  let b64=str.replace(/-/g,'+').replace(/_/g,'/');
-  while(b64.length%4)b64+='=';
-  const json=decodeURIComponent(Array.prototype.map.call(atob(b64),c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-  return JSON.parse(json);
-}
+/* URL-safe base64 (works with accents, °, subscripts, emoji) */
+function enc(obj){const s=JSON.stringify(obj);const b=btoa(encodeURIComponent(s).replace(/%([0-9A-F]{2})/g,(_,p)=>String.fromCharCode(parseInt(p,16))));return b.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
+function dec(str){let b=str.replace(/-/g,'+').replace(/_/g,'/');while(b.length%4)b+='=';const s=decodeURIComponent(Array.prototype.map.call(atob(b),c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));return JSON.parse(s);}
 
 /* ============================================================
-   3) LOCAL STATS (localStorage, with a safe in-memory fallback)
+   3) SOUND (Web Audio — gentle beeps, with a mute button)
    ============================================================ */
-let memStats=null; // used if localStorage is blocked (e.g. inside a sandbox)
-function loadStats(){
-  const def={games:0,wins:0,streak:0,best:0,name:""};
-  try{const raw=localStorage.getItem('quizclash');return raw?{...def,...JSON.parse(raw)}:def;}
-  catch(e){return memStats||def;}
-}
-function saveStats(s){
-  try{localStorage.setItem('quizclash',JSON.stringify(s));}
-  catch(e){memStats=s;}
-}
-function renderStats(){
-  const s=loadStats();
-  $('s-games').textContent=s.games;
-  $('s-wins').textContent=s.wins;
-  $('s-streak').textContent=s.streak;
-  $('s-best').textContent=s.best;
-  if(s.name){$('name').value=s.name;$('name2').value=s.name;}
-}
+let actx=null, muted=false;
+function ac(){if(!actx){try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(actx&&actx.state==='suspended')actx.resume();return actx;}
+function beep(freq,dur,type,vol,when){const c=ac();if(!c||muted)return;const o=c.createOscillator(),g=c.createGain();o.type=type||'sine';o.frequency.value=freq;o.connect(g);g.connect(c.destination);const t=c.currentTime+(when||0);g.gain.setValueAtTime(vol||0.15,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);o.start(t);o.stop(t+dur);}
+const sCorrect=()=>{beep(660,0.12,'sine',0.18);beep(880,0.16,'sine',0.18,0.10);};
+const sWrong  =()=>beep(190,0.24,'sawtooth',0.12);
+const sClick  =()=>beep(420,0.05,'square',0.06);
+const sWin    =()=>[523,659,784,1047].forEach((f,i)=>beep(f,0.18,'triangle',0.16,i*0.12));
+function toggleMute(){muted=!muted;$('muteBtn').textContent=muted?'🔇':'🔊';const s=loadStats();s.muted=muted;saveStats(s);if(!muted)sClick();}
 
 /* ============================================================
-   4) APP STATE
+   4) LOCAL STATS (localStorage with safe in-memory fallback)
    ============================================================ */
-let G={
-  questions:[],   // [{q, o:[opts], c:correctIndex}]
-  i:0, score:0, totalTime:0,
-  difficulty:'easy', amount:7,
-  isChallenge:false, rival:null,  // {name, score, count, time}
-  myName:'Player',
-  answered:false, qStart:0, timer:null,
-};
+let mem=null;
+function loadStats(){const d={games:0,wins:0,streak:0,best:0,name:"",muted:false};try{const r=localStorage.getItem('quizgyan');return r?{...d,...JSON.parse(r)}:d;}catch(e){return mem||d;}}
+function saveStats(s){try{localStorage.setItem('quizgyan',JSON.stringify(s));}catch(e){mem=s;}}
+function renderStats(){const s=loadStats();$('s-games').textContent=s.games;$('s-wins').textContent=s.wins;$('s-streak').textContent=s.streak;$('s-best').textContent=s.best;if(s.name){$('name').value=s.name;$('name2').value=s.name;}muted=!!s.muted;$('muteBtn').textContent=muted?'🔇':'🔊';}
 
 /* ============================================================
-   5) SCREEN SWITCHING
+   5) STATE + SCREENS
    ============================================================ */
-const SCREENS=['home','challenge','loading','quiz','results'];
-function show(name){
-  SCREENS.forEach(s=>$('screen-'+s).classList.toggle('hidden', s!==name));
-  // re-trigger entrance animation
-  const el=$('screen-'+name);
-  el.classList.remove('screen');void el.offsetWidth;el.classList.add('screen');
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function goHome(){location.hash='';renderStats();show('home');}
+let G={questions:[],i:0,score:0,totalTime:0,combo:0,maxCombo:0,difficulty:'easy',amount:7,isChallenge:false,rival:null,myName:'Player',answered:false,qStart:0,timer:null};
+const SCREENS=['home','challenge','quiz','results'];
+function show(n){SCREENS.forEach(s=>$('screen-'+s).classList.toggle('hidden',s!==n));const el=$('screen-'+n);el.classList.remove('screen');void el.offsetWidth;el.classList.add('screen');window.scrollTo({top:0,behavior:'smooth'});}
+function goHome(){sClick();location.hash='';renderStats();show('home');}
+
+/* segmented controls */
+function wireSeg(id,fn){$(id).querySelectorAll('button').forEach(b=>{b.onclick=()=>{sClick();$(id).querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');fn(b.dataset.v);};});}
+wireSeg('diff',v=>G.difficulty=v);
+wireSeg('amount',v=>G.amount=parseInt(v,10));
 
 /* ============================================================
-   6) SEGMENTED CONTROLS (difficulty / amount)
+   6) PICK QUESTIONS FROM THE BANK
    ============================================================ */
-function wireSeg(id, onpick){
-  $(id).querySelectorAll('button').forEach(b=>{
-    b.onclick=()=>{
-      $(id).querySelectorAll('button').forEach(x=>x.classList.remove('on'));
-      b.classList.add('on');onpick(b.dataset.v);
-    };
-  });
-}
-wireSeg('diff', v=>G.difficulty=v);
-wireSeg('amount', v=>G.amount=parseInt(v,10));
-
-/* ============================================================
-   7) GET QUESTIONS  (Open Trivia DB → fallback to bank)
-   ============================================================ */
-async function fetchFromAPI(amount, difficulty){
-  const url=`https://opentdb.com/api.php?amount=${amount}&category=${SCIENCE_CATEGORY}&difficulty=${difficulty}&type=multiple&encode=url3986`;
-  const res=await fetch(url);
-  if(!res.ok) throw new Error('network');
-  const data=await res.json();
-  if(data.response_code!==0 || !data.results || !data.results.length) throw new Error('no results');
-  return data.results.map(item=>{
-    const correct=decodeURIComponent(item.correct_answer);
-    const opts=shuffle([correct, ...item.incorrect_answers.map(decodeURIComponent)]);
-    return {q:decodeURIComponent(item.question), o:opts, c:opts.indexOf(correct)};
-  });
-}
-function fromBank(amount, difficulty){
-  let pool=SCIENCE_BANK.filter(x=>x.d===difficulty);
-  if(pool.length<amount) pool=pool.concat(SCIENCE_BANK.filter(x=>x.d!==difficulty));
+function getQuestions(amount,difficulty){
+  let pool=QUESTIONS.filter(x=>x.d===difficulty);
+  if(pool.length<amount) pool=pool.concat(QUESTIONS.filter(x=>x.d!==difficulty));
   return shuffle(pool).slice(0,amount).map(item=>{
-    const opts=shuffle([item.correct, ...item.wrong]);
-    return {q:item.q, o:opts, c:opts.indexOf(item.correct)};
+    const opts=shuffle([item.a,...item.w]);
+    return {q:item.q,o:opts,c:opts.indexOf(item.a),e:item.e};
   });
-}
-async function getQuestions(amount, difficulty){
-  try{ return await fetchFromAPI(amount, difficulty); }
-  catch(e){ return fromBank(amount, difficulty); }
 }
 
 /* ============================================================
-   8) START A ROUND
+   7) START A ROUND
    ============================================================ */
-async function startSolo(){
+function startSolo(){
+  ac(); sClick();
   G.myName=($('name').value.trim()||'Player').slice(0,14);
   const s=loadStats();s.name=G.myName;saveStats(s);
   G.isChallenge=false;G.rival=null;
-  show('loading');$('load-msg').textContent='Pulling fresh Science questions…';
-  G.questions=await getQuestions(G.amount, G.difficulty);
+  G.questions=getQuestions(G.amount,G.difficulty);
   beginQuiz();
 }
 function acceptChallenge(){
+  ac(); sClick();
   G.myName=($('name2').value.trim()||'Player').slice(0,14);
   const s=loadStats();s.name=G.myName;saveStats(s);
   beginQuiz(); // questions already loaded from the link
 }
 
 /* ============================================================
-   9) QUIZ ENGINE
+   8) QUIZ ENGINE
    ============================================================ */
 function beginQuiz(){
-  G.i=0;G.score=0;G.totalTime=0;
+  G.i=0;G.score=0;G.totalTime=0;G.combo=0;G.maxCombo=0;
+  // build progress dots
+  const dots=$('q-dots');dots.innerHTML='';
+  G.questions.forEach(()=>dots.appendChild(document.createElement('i')));
   show('quiz');renderQuestion();
 }
 function renderQuestion(){
   G.answered=false;
   const item=G.questions[G.i];
-  $('q-count').textContent=`Question ${G.i+1} / ${G.questions.length}`;
-  $('q-score').textContent='★ '+G.score;
+  // dots
+  const dots=$('q-dots').children;
+  for(let k=0;k<dots.length;k++){dots[k].className=k<G.i?'done':(k===G.i?'active':'');}
+  $('q-score').textContent='✦ '+G.score;
+  updateCombo();
   $('q-text').textContent=item.q;
+  $('q-explain').classList.remove('show');$('q-explain').innerHTML='';
+  $('q-next').classList.remove('show');
 
   const box=$('q-opts');box.innerHTML='';
   const letters=['A','B','C','D','E'];
   item.o.forEach((opt,idx)=>{
     const b=document.createElement('button');
-    b.className='opt';
-    b.innerHTML=`<span class="key">${letters[idx]}</span><span>${opt}</span><span class="mark"></span>`;
+    b.className='opt';b.type='button';
+    b.innerHTML='<span class="key">'+letters[idx]+'</span><span>'+opt+'</span><span class="mk"></span>';
     b.onclick=()=>answer(idx);
     box.appendChild(b);
   });
   startTimer();
 }
+function updateCombo(){
+  const c=$('q-combo');
+  if(G.combo>=2){c.textContent='🔥 x'+G.combo;c.classList.add('show');}
+  else c.classList.remove('show');
+}
 function startTimer(){
-  clearInterval(G.timer);
-  G.qStart=Date.now();
-  const bar=$('timerbar');bar.classList.remove('warn');bar.style.transition='none';bar.style.width='100%';
-  void bar.offsetWidth;bar.style.transition='width .12s linear';
+  clearInterval(G.timer);G.qStart=Date.now();
+  const bar=$('timerbar');bar.classList.remove('warn');bar.style.transition='none';bar.style.width='100%';void bar.offsetWidth;bar.style.transition='width .12s linear';
   const total=TIME_PER_Q*1000;
   G.timer=setInterval(()=>{
     const left=total-(Date.now()-G.qStart);
     const pct=Math.max(0,left/total*100);
     bar.style.width=pct+'%';
-    if(pct<35) bar.classList.add('warn');
+    if(pct<35)bar.classList.add('warn');
     if(left<=0){clearInterval(G.timer);answer(-1);}
   },100);
 }
 function answer(idx){
-  if(G.answered) return;
-  G.answered=true;
-  clearInterval(G.timer);
+  if(G.answered)return;
+  G.answered=true;clearInterval(G.timer);
   const elapsed=Math.min(TIME_PER_Q,(Date.now()-G.qStart)/1000);
-  G.totalTime += (idx===-1)? TIME_PER_Q : elapsed;
+  G.totalTime+=(idx===-1)?TIME_PER_Q:elapsed;
 
-  const correct=G.questions[G.i].c;
+  const item=G.questions[G.i];
+  const correct=item.c;
   const opts=$('q-opts').children;
-  for(let k=0;k<opts.length;k++) opts[k].setAttribute('disabled','');
-  opts[correct].classList.add('correct');
-  opts[correct].querySelector('.mark').textContent='✓';
+  for(let k=0;k<opts.length;k++)opts[k].setAttribute('disabled','');
+  opts[correct].classList.add('correct');opts[correct].querySelector('.mk').textContent='✓';
+
   if(idx===correct){
-    G.score++;
-    $('q-score').textContent='★ '+G.score;
-  }else if(idx>=0){
-    opts[idx].classList.add('wrong');
-    opts[idx].querySelector('.mark').textContent='✕';
+    G.score++;G.combo++;if(G.combo>G.maxCombo)G.maxCombo=G.combo;
+    $('q-score').textContent='✦ '+G.score;sCorrect();
+  }else{
+    G.combo=0;
+    if(idx>=0){opts[idx].classList.add('wrong');opts[idx].querySelector('.mk').textContent='✕';}
+    sWrong();
   }
-  setTimeout(next, idx===correct?850:1250);
+  updateCombo();
+  // show explanation + Next button (read at your own pace — learn as you play)
+  const ex=$('q-explain');
+  ex.innerHTML='<b>💡 '+(idx===correct?'Correct!':'Answer: '+item.o[correct])+'</b> '+item.e;
+  ex.classList.add('show');
+  const nb=$('q-next');
+  nb.textContent=(G.i===G.questions.length-1)?'See results →':'Next →';
+  nb.classList.add('show');
 }
 function next(){
+  sClick();
   G.i++;
-  if(G.i<G.questions.length) renderQuestion();
+  if(G.i<G.questions.length)renderQuestion();
   else finishQuiz();
 }
 
 /* ============================================================
-   10) RESULTS + STREAK
+   9) RESULTS, RANKS + STREAK
    ============================================================ */
+function rankTitle(pct){
+  if(pct===100)return'🏆 Science Legend';
+  if(pct>=80)return'🧠 Brainiac';
+  if(pct>=60)return'⚡ Quick Thinker';
+  if(pct>=40)return'📚 Rising Star';
+  return'🌱 Keep Going';
+}
 function finishQuiz(){
-  const stats=loadStats();
-  stats.games++;
-  if(G.score>stats.best) stats.best=G.score;
+  const stats=loadStats();stats.games++;if(G.score>stats.best)stats.best=G.score;
+  const N=G.questions.length, pct=Math.round(G.score/N*100);
 
-  const v=$('r-verdict'), compare=$('r-compare'), streakbox=$('r-streakbox');
-  $('r-score').innerHTML=`${G.score}<small>/${G.questions.length}</small>`;
-  compare.classList.add('hidden');streakbox.classList.add('hidden');
-  v.className='verdict';
+  $('r-score').innerHTML=G.score+'<small>/'+N+'</small>';
+  $('r-acc').textContent=pct+'%';
+  $('r-combo').textContent=G.maxCombo+'🔥';
+  $('r-rank').textContent=rankTitle(pct);
+  const v=$('r-verdict');v.className='verdict';
+  $('r-compare').classList.add('hidden');$('r-streakbox').classList.add('hidden');
 
-  if(G.isChallenge && G.rival){
-    // decide the duel: more correct wins; tie broken by faster total time
-    let win;
-    if(G.score>G.rival.score) win='win';
-    else if(G.score<G.rival.score) win='lose';
-    else win = (G.totalTime < G.rival.time) ? 'win' : (G.totalTime > G.rival.time ? 'lose' : 'draw');
+  if(G.isChallenge&&G.rival){
+    let res;
+    if(G.score>G.rival.score)res='win';
+    else if(G.score<G.rival.score)res='lose';
+    else res=(G.totalTime<G.rival.time)?'win':(G.totalTime>G.rival.time?'lose':'draw');
 
-    if(win==='win'){v.textContent='YOU WIN! 🏆';v.classList.add('win');stats.wins++;stats.streak++;if(!reducedMotion)celebrate();}
-    else if(win==='lose'){v.textContent='YOU LOST 💪';v.classList.add('lose');stats.streak=0;}
+    if(res==='win'){v.textContent='YOU WIN! 🏆';v.classList.add('win');stats.wins++;stats.streak++;sWin();if(!reduce)celebrate();}
+    else if(res==='lose'){v.textContent='YOU LOST 💪';v.classList.add('lose');stats.streak=0;}
     else{v.textContent="IT'S A DRAW";v.classList.add('draw');}
 
-    // comparison bars
     const max=Math.max(G.score,G.rival.score,1);
-    $('r-me-name').textContent=G.myName;
-    $('r-them-name').textContent=G.rival.name;
-    $('r-me-pts').textContent=G.score; $('r-them-pts').textContent=G.rival.score;
-    compare.classList.remove('hidden');
-    setTimeout(()=>{ $('r-me-bar').style.width=(G.score/max*100)+'%'; $('r-them-bar').style.width=(G.rival.score/max*100)+'%'; },120);
-
-    $('r-sub').textContent = win==='draw'
-      ? `Dead even on ${G.questions.length} questions!`
-      : (win==='win'?`You beat ${G.rival.name} ${G.score}–${G.rival.score}!`:`${G.rival.name} edged you ${G.rival.score}–${G.score}.`);
-
-    streakbox.classList.remove('hidden');
-    $('r-streak').textContent=stats.streak;
+    $('r-me-name').textContent=G.myName;$('r-them-name').textContent=G.rival.name;
+    $('r-me-pts').textContent=G.score;$('r-them-pts').textContent=G.rival.score;
+    $('r-compare').classList.remove('hidden');
+    setTimeout(()=>{$('r-me-bar').style.width=(G.score/max*100)+'%';$('r-them-bar').style.width=(G.rival.score/max*100)+'%';},120);
+    $('r-sub').textContent= res==='draw' ? ('Dead even on '+N+' questions!') : (res==='win'?('You beat '+G.rival.name+' '+G.score+'–'+G.rival.score+'!'):(G.rival.name+' edged you '+G.rival.score+'–'+G.score+'.'));
+    $('r-streakbox').classList.remove('hidden');$('r-streak').textContent=stats.streak;
   }else{
-    // solo practice round — no opponent yet
     v.textContent='NICE ONE!';v.classList.add('solo');
-    const pct=Math.round(G.score/G.questions.length*100);
-    $('r-sub').textContent=`You scored ${pct}%. Now make it count — challenge a friend!`;
+    if(pct>=70&&!reduce){sWin();celebrate();}
+    $('r-sub').textContent='You scored '+pct+'%. Now make it count — challenge a friend!';
   }
-
   saveStats(stats);
-  // reset the share box each time
-  $('sharebox').classList.remove('show');
-  $('copybtn').textContent='COPY';
+  $('sharebox').classList.remove('show');$('copybtn').textContent='COPY';
   show('results');
 }
 
 /* ============================================================
-   11) BUILD + COPY THE CHALLENGE LINK
-   The whole battle lives in the link — no server needed.
+   10) BUILD + COPY THE CHALLENGE LINK
+        The whole battle lives in the link — no server needed.
    ============================================================ */
 function shareChallenge(){
-  const payload={
-    v:1,
-    n:G.myName,
-    s:G.score,
-    t:Math.round(G.totalTime),
-    d:G.difficulty,
-    q:G.questions.map(x=>({q:x.q,o:x.o,c:x.c})),
-  };
-  const link=location.origin+location.pathname+'#b='+encodeState(payload);
-  $('sharelink').value=link;
-  $('sharebox').classList.add('show');
-  copyLink();
+  sClick();
+  const payload={v:1,n:G.myName,s:G.score,t:Math.round(G.totalTime),d:G.difficulty,q:G.questions.map(x=>({q:x.q,o:x.o,c:x.c,e:x.e}))};
+  const link=location.origin+location.pathname+'#b='+enc(payload);
+  $('sharelink').value=link;$('sharebox').classList.add('show');copyLink();
 }
 function copyLink(){
-  const input=$('sharelink'); const link=input.value;
-  const done=()=>{ $('copybtn').textContent='COPIED ✓'; $('copyhint').textContent='Link copied! Paste it to your friend 🎉'; };
-  if(navigator.clipboard && window.isSecureContext){
-    navigator.clipboard.writeText(link).then(done).catch(()=>fallbackCopy(input,done));
-  }else{ fallbackCopy(input,done); }
+  const input=$('sharelink'),link=input.value;
+  const done=()=>{$('copybtn').textContent='COPIED ✓';$('copyhint').textContent='Link copied! Paste it to your friend 🎉';};
+  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(link).then(done).catch(()=>fallbackCopy(input,done));}
+  else fallbackCopy(input,done);
 }
-function fallbackCopy(input,done){
-  input.removeAttribute('readonly');input.select();input.setSelectionRange(0,99999);
-  try{document.execCommand('copy');done();}catch(e){$('copyhint').textContent='Tap the link, then copy it manually.';}
-  input.setAttribute('readonly','');
-}
-function playAgain(){
-  if(G.isChallenge){ acceptChallenge(); } // same questions, replay
-  else { startSolo(); }                    // fresh questions
-}
+function fallbackCopy(input,done){input.removeAttribute('readonly');input.select();input.setSelectionRange(0,99999);try{document.execCommand('copy');done();}catch(e){$('copyhint').textContent='Tap the link, then copy it manually.';}input.setAttribute('readonly','');}
+function playAgain(){sClick();G.isChallenge?acceptChallenge():startSolo();}
 
 /* ============================================================
-   12) CONFETTI (win celebration)
+   11) CONFETTI
    ============================================================ */
 function celebrate(){
-  const colors=['#36e6ff','#b6ff3b','#ff3ea5','#ffc43d','#2fe08a'];
-  for(let i=0;i<90;i++){
-    const c=document.createElement('div');
-    c.className='confetti';
-    c.style.left=Math.random()*100+'vw';
-    c.style.background=colors[i%colors.length];
-    c.style.animationDelay=(Math.random()*0.5)+'s';
-    c.style.animationDuration=(1.8+Math.random()*1.1)+'s';
-    document.body.appendChild(c);
-    setTimeout(()=>c.remove(),3200);
-  }
+  const colors=['#3257f0','#ffb300','#ff5d73','#1faf6b','#5b7bff'];
+  for(let i=0;i<90;i++){const c=document.createElement('div');c.className='confetti';c.style.left=Math.random()*100+'vw';c.style.background=colors[i%colors.length];c.style.animationDelay=(Math.random()*0.5)+'s';c.style.animationDuration=(1.8+Math.random()*1.1)+'s';document.body.appendChild(c);setTimeout(()=>c.remove(),3200);}
 }
 
 /* ============================================================
-   13) STARTUP — is this a challenge link?
+   12) STARTUP — is this a challenge link?
    ============================================================ */
 function init(){
   renderStats();
-  const params=new URLSearchParams(location.hash.slice(1));
-  const b=params.get('b');
+  const b=new URLSearchParams(location.hash.slice(1)).get('b');
   if(b){
     try{
-      const data=decodeState(b);
-      if(data && data.q && data.q.length){
-        G.questions=data.q.map(x=>({q:x.q,o:x.o,c:x.c}));
+      const data=dec(b);
+      if(data&&data.q&&data.q.length){
+        G.questions=data.q.map(x=>({q:x.q,o:x.o,c:x.c,e:x.e||''}));
         G.isChallenge=true;
-        G.rival={name:(data.n||'A friend').slice(0,14), score:data.s, count:data.q.length, time:data.t||9999};
+        G.rival={name:(data.n||'A friend').slice(0,14),score:data.s,count:data.q.length,time:data.t||9999};
         $('ch-name').textContent=G.rival.name;
         $('ch-count').textContent=G.rival.count;
-        $('ch-score').textContent=`${G.rival.score}/${G.rival.count}`;
-        show('challenge');
-        return;
+        $('ch-score').textContent=G.rival.score+'/'+G.rival.count;
+        show('challenge');return;
       }
-    }catch(e){ /* bad/old link → just go home */ }
+    }catch(e){/* bad/old link → home */}
   }
   show('home');
 }
