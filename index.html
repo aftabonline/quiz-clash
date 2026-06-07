@@ -257,8 +257,8 @@ input[type=text]:focus{border-color:var(--brand);box-shadow:0 0 0 4px rgba(50,87
       <label class="fld">Questions</label>
       <div class="seg warm" id="amount">
         <button data-v="5">5</button>
-        <button data-v="7" class="on">7</button>
-        <button data-v="10">10</button>
+        <button data-v="7">7</button>
+        <button data-v="10" class="on">10</button>
       </div>
 
       <button class="btn" onclick="startSolo()">⚔ START BATTLE</button>
@@ -515,6 +515,113 @@ const QUESTIONS = [
 {d:"hard",q:"A substance that speeds up a reaction without being used up is a…?",a:"Catalyst",w:["Solvent","Solute","Mixture"],e:"A catalyst makes a reaction go faster but is not used up itself."},
 {d:"hard",q:"Which colour of light bends the most through a prism?",a:"Violet",w:["Red","Yellow","Green"],e:"Violet light bends the most and red light the least in a prism."},
 {d:"hard",q:"What is the chemical symbol for potassium?",a:"K",w:["Po","Pt","P"],e:"Potassium's symbol K comes from its Latin name 'kalium'."},
+
+/* ================= 100 MORE QUESTIONS ================= */
+/* ---- more EASY ---- */
+{d:"easy",q:"Which of these is a non-living thing?",a:"Rock",w:["Tree","Dog","Fish"],e:"Rocks do not grow, breathe or reproduce, so they are non-living."},
+{d:"easy",q:"What do we call animals that hunt other animals for food?",a:"Predators",w:["Producers","Herbivores","Plants"],e:"Predators hunt and eat other animals, which are called their prey."},
+{d:"easy",q:"Which of these is a mammal that lives in the sea?",a:"Dolphin",w:["Shark","Octopus","Jellyfish"],e:"Dolphins are mammals that live in the sea but breathe air."},
+{d:"easy",q:"How many senses does a human normally have?",a:"Five",w:["Three","Seven","Two"],e:"The five senses are sight, hearing, smell, taste and touch."},
+{d:"easy",q:"Which organ helps us taste food?",a:"Tongue",w:["Nose","Ear","Skin"],e:"The tongue has taste buds that sense sweet, sour, salty and bitter."},
+{d:"easy",q:"Which of these is a cold-blooded animal?",a:"Lizard",w:["Dog","Human","Elephant"],e:"Reptiles like lizards are cold-blooded; their body temperature changes with their surroundings."},
+{d:"easy",q:"Which of these is a bird?",a:"Sparrow",w:["Bat","Butterfly","Whale"],e:"Sparrows are birds — they have feathers, wings and a beak."},
+{d:"easy",q:"Cows, goats and sheep are examples of…?",a:"Herbivores",w:["Carnivores","Omnivores","Predators"],e:"These animals eat only plants, so they are herbivores."},
+{d:"easy",q:"Which season is usually the hottest?",a:"Summer",w:["Winter","Autumn","Spring"],e:"Summer is the warmest season because of stronger, more direct sunlight."},
+{d:"easy",q:"What do we call water falling from clouds?",a:"Rain",w:["Wind","A cloud","Fog"],e:"Rain is water droplets falling from clouds to the ground."},
+{d:"easy",q:"Which of these can usually be seen only at night?",a:"Stars",w:["The Sun","Daytime clouds","A rainbow"],e:"Stars are normally visible at night when the sky is dark."},
+{d:"easy",q:"Which mineral, found in milk, keeps our bones strong?",a:"Calcium",w:["Plastic","Rubber","Glass"],e:"Calcium helps build strong bones and teeth."},
+{d:"easy",q:"Milk, eggs and meat are rich in…?",a:"Proteins",w:["Only water","Plastic","Sand"],e:"Proteins help our body grow and repair itself."},
+{d:"easy",q:"Which of these animals lays eggs?",a:"Hen",w:["Cow","Dog","Cat"],e:"Hens are birds, and birds lay eggs."},
+{d:"easy",q:"A baby dog is called a…?",a:"Puppy",w:["Kitten","Calf","Cub"],e:"A young dog is called a puppy."},
+{d:"easy",q:"Which of these is a part of a flower?",a:"Petal",w:["Root","Trunk","Branch"],e:"Petals are the colourful parts of a flower that attract insects."},
+{d:"easy",q:"Which of these floats on water?",a:"Wood",w:["Iron nail","Stone","Coin"],e:"Wood is light for its size, so it floats on water."},
+{d:"easy",q:"The hard parts inside the mouth used for biting are…?",a:"Teeth",w:["Nails","Arm bones","Hair"],e:"Teeth help us bite and chew our food."},
+{d:"easy",q:"What do we call the path the Earth takes around the Sun?",a:"Orbit",w:["Axis","Equator","Crust"],e:"The Earth moves around the Sun along a path called its orbit."},
+{d:"easy",q:"Which instrument is used to see very tiny things?",a:"Microscope",w:["Telescope","Periscope","Stethoscope"],e:"A microscope makes very small objects look much bigger."},
+{d:"easy",q:"Plants take support and nutrients from the…?",a:"Soil",w:["Plastic","Sound","Electricity"],e:"Roots hold the plant in the soil and absorb nutrients from it."},
+{d:"easy",q:"What do we call the natural home of an animal?",a:"Habitat",w:["Orbit","Recipe","Skeleton"],e:"A habitat is the place where an animal naturally lives."},
+{d:"easy",q:"Which body part protects the brain?",a:"Skull",w:["Ribs","Backbone","Knee"],e:"The skull is the hard bone case that protects the brain."},
+{d:"easy",q:"A burning candle gives out light and…?",a:"Heat",w:["Sound","Rain","Ice"],e:"A burning candle releases both light and heat energy."},
+{d:"easy",q:"What do we call rain that falls as small balls of ice?",a:"Hail",w:["Dew","Mist","Steam"],e:"Hail is rain that has frozen into small balls of ice."},
+{d:"easy",q:"Which is the largest animal living on land?",a:"Elephant",w:["Lion","Horse","Cow"],e:"The elephant is the largest living land animal."},
+{d:"easy",q:"Fruits and vegetables give us mainly…?",a:"Vitamins and minerals",w:["Only fat","Plastic","Metal"],e:"Fruits and vegetables are rich in vitamins and minerals."},
+{d:"easy",q:"What do we use to find directions like north and south?",a:"A compass",w:["A clock","A ruler","A thermometer"],e:"A compass needle points towards the north."},
+{d:"easy",q:"Which of these is a reptile?",a:"Snake",w:["Frog","Sparrow","Whale"],e:"Snakes are reptiles, with dry, scaly skin."},
+{d:"easy",q:"Which part helps a plant stand upright and carries water to the leaves?",a:"Stem",w:["Flower","Fruit","Seed"],e:"The stem supports the plant and carries water and food."},
+{d:"easy",q:"The hot, melted rock found beneath the Earth's surface is called…?",a:"Magma",w:["Mud","Ice","Sand"],e:"Magma is molten (melted) rock found deep under the ground."},
+{d:"easy",q:"Which of these animals can truly fly?",a:"Bat",w:["Penguin","Ostrich","Snake"],e:"A bat is a mammal that can really fly using its wings."},
+{d:"easy",q:"How long does the Earth take to spin once on its axis?",a:"About a day",w:["About a year","About a month","About an hour"],e:"The Earth spins once in about 24 hours, which makes one day."},
+{d:"easy",q:"Which type of food gives our body the most energy?",a:"Carbohydrates",w:["Water","Air","Salt"],e:"Carbohydrates like rice, bread and potatoes give us energy."},
+
+/* ---- more MEDIUM ---- */
+{d:"medium",q:"Which scientist first discovered cells?",a:"Robert Hooke",w:["Isaac Newton","Charles Darwin","Gregor Mendel"],e:"Robert Hooke first saw and named cells in 1665 using a microscope."},
+{d:"medium",q:"Which gas is needed for something to burn?",a:"Oxygen",w:["Nitrogen","Carbon dioxide","Hydrogen"],e:"Burning needs oxygen; without it, a flame goes out."},
+{d:"medium",q:"Which tube carries water and minerals up through a plant?",a:"Xylem",w:["Phloem","Artery","Vein"],e:"Xylem carries water and minerals from the roots up to the leaves."},
+{d:"medium",q:"Which tube carries food made in the leaves to the rest of the plant?",a:"Phloem",w:["Xylem","Trachea","Oesophagus"],e:"Phloem transports the sugary food made in the leaves to other parts."},
+{d:"medium",q:"The tiny pores on a leaf that allow gases in and out are called…?",a:"Stomata",w:["Spiracles","Skin pores","Nostrils"],e:"Stomata are small openings on leaves for taking in CO₂ and releasing O₂."},
+{d:"medium",q:"A lack of which vitamin causes the disease scurvy?",a:"Vitamin C",w:["Vitamin A","Vitamin D","Vitamin K"],e:"Too little vitamin C causes scurvy, with bleeding gums and weakness."},
+{d:"medium",q:"Which mineral in our food helps prevent anaemia?",a:"Iron",w:["Calcium","Sodium","Carbon"],e:"Iron is needed to make haemoglobin; too little causes anaemia."},
+{d:"medium",q:"Curd (yogurt) is made from milk with the help of…?",a:"Bacteria",w:["Viruses","Insects","Plants"],e:"Helpful bacteria turn milk into curd."},
+{d:"medium",q:"Which blood vessels carry blood away from the heart?",a:"Arteries",w:["Veins","Only capillaries","Nerves"],e:"Arteries carry blood away from the heart; veins carry it back."},
+{d:"medium",q:"The largest gland in the human body is the…?",a:"Liver",w:["Kidney","Heart","Pancreas"],e:"The liver is the body's largest gland and helps with digestion."},
+{d:"medium",q:"Which method separates sand from water?",a:"Filtration",w:["Evaporation","Distillation","Magnetic separation"],e:"Filtration uses a filter to separate insoluble solids like sand from water."},
+{d:"medium",q:"Burning a piece of paper is an example of a…?",a:"Chemical change",w:["Physical change","Change of state only","No change"],e:"Burning forms new substances such as ash and gases, so it is a chemical change."},
+{d:"medium",q:"Melting of ice into water is an example of a…?",a:"Physical change",w:["Chemical change","Combustion","New substance forming"],e:"Melting only changes the state; it is still water, so it is a physical change."},
+{d:"medium",q:"A ramp used to move loads upward is which simple machine?",a:"Inclined plane",w:["Pulley","Lever","Screw"],e:"An inclined plane (ramp) makes it easier to raise a load."},
+{d:"medium",q:"Speed is calculated as distance divided by…?",a:"Time",w:["Mass","Force","Weight"],e:"Speed = distance ÷ time."},
+{d:"medium",q:"The Earth itself behaves like a giant…?",a:"Magnet",w:["Battery","Mirror","Lens"],e:"The Earth acts like a huge magnet, which is why compass needles point north."},
+{d:"medium",q:"The upward force that makes objects float in water is called…?",a:"Upthrust (buoyancy)",w:["Friction","Magnetism","Only gravity"],e:"Water pushes up on objects with a force called upthrust or buoyancy."},
+{d:"medium",q:"Which of these is a renewable source of energy?",a:"Sunlight",w:["Coal","Petrol","Natural gas"],e:"Sunlight is renewable; unlike coal or oil, it will not run out."},
+{d:"medium",q:"Coal, petrol and natural gas are together called…?",a:"Fossil fuels",w:["Renewable fuels","Metals","Minerals only"],e:"Fossil fuels formed from the remains of ancient plants and animals."},
+{d:"medium",q:"Heat travelling along a metal spoon is an example of…?",a:"Conduction",w:["Convection","Radiation","Reflection"],e:"In conduction, heat passes from particle to particle through a solid."},
+{d:"medium",q:"Which planet is known as the 'Blue Planet'?",a:"Earth",w:["Neptune","Uranus","Venus"],e:"Earth looks blue from space because most of it is covered by water."},
+{d:"medium",q:"Splitting white light into seven colours using a prism is called…?",a:"Dispersion",w:["Reflection","Conduction","Absorption"],e:"A prism causes dispersion, spreading white light into its colours."},
+{d:"medium",q:"Which part of the eye controls how much light enters?",a:"Pupil",w:["Retina","Eyelash","Eyebrow"],e:"The pupil widens or narrows to control the light entering the eye."},
+{d:"medium",q:"Ferns and mosses reproduce using tiny structures called…?",a:"Spores",w:["Stones","Coins","Bones"],e:"Instead of seeds, ferns and mosses reproduce by spores."},
+{d:"medium",q:"Animals that are active at night are called…?",a:"Nocturnal",w:["Diurnal","Extinct","Migratory"],e:"Nocturnal animals, such as owls and bats, are active at night."},
+{d:"medium",q:"Which gas makes bread and cakes rise while baking?",a:"Carbon dioxide",w:["Oxygen","Nitrogen","Hydrogen"],e:"Yeast or baking soda releases carbon dioxide, making the dough rise."},
+{d:"medium",q:"Rain, snow and hail are together called…?",a:"Precipitation",w:["Evaporation","Condensation","Transpiration"],e:"Precipitation is water that falls from clouds as rain, snow or hail."},
+{d:"medium",q:"Which instrument is used to measure rainfall?",a:"Rain gauge",w:["Barometer","Compass","Thermometer"],e:"A rain gauge collects and measures how much rain has fallen."},
+{d:"medium",q:"Which of these is a good conductor of electricity?",a:"Copper",w:["Rubber","Wood","Glass"],e:"Copper is a metal and conducts electricity well, so it is used in wires."},
+{d:"medium",q:"Which bones form a cage that protects the lungs and heart?",a:"Ribs",w:["Skull bones","Leg bones","Finger bones"],e:"The rib cage surrounds and protects the lungs and heart."},
+{d:"medium",q:"A magnet attracting iron without touching it is an example of a…?",a:"Non-contact force",w:["Contact force","Muscular force","Friction"],e:"Magnetic force acts at a distance, so it is a non-contact force."},
+{d:"medium",q:"The Sun is mainly made up of which gas?",a:"Hydrogen",w:["Oxygen","Carbon dioxide","Nitrogen"],e:"The Sun is mostly hydrogen, with some helium."},
+{d:"medium",q:"Frogs and toads belong to which animal group?",a:"Amphibians",w:["Reptiles","Mammals","Birds"],e:"Amphibians can live both in water and on land, like frogs and toads."},
+
+/* ---- more HARD ---- */
+{d:"hard",q:"What is the chemical symbol for carbon?",a:"C",w:["Ca","Co","Cr"],e:"Carbon is represented by the single letter C."},
+{d:"hard",q:"What is the chemical symbol for calcium?",a:"Ca",w:["C","Cl","Cm"],e:"Calcium's symbol is Ca; it is important for our bones."},
+{d:"hard",q:"What is the chemical symbol for copper?",a:"Cu",w:["Co","Cp","Cr"],e:"Copper's symbol Cu comes from its Latin name 'cuprum'."},
+{d:"hard",q:"What is the chemical symbol for silver?",a:"Ag",w:["Si","Sv","Au"],e:"Silver's symbol Ag comes from its Latin name 'argentum'."},
+{d:"hard",q:"Who created the first widely used periodic table of elements?",a:"Dmitri Mendeleev",w:["Isaac Newton","Albert Einstein","John Dalton"],e:"Mendeleev arranged the elements into the periodic table in 1869."},
+{d:"hard",q:"Who proposed the theory of evolution by natural selection?",a:"Charles Darwin",w:["Gregor Mendel","Louis Pasteur","Isaac Newton"],e:"Darwin explained evolution by natural selection in 1859."},
+{d:"hard",q:"Which scientist showed that germs cause many diseases?",a:"Louis Pasteur",w:["Isaac Newton","Charles Darwin","Galileo Galilei"],e:"Pasteur's germ theory proved that tiny microbes cause many illnesses."},
+{d:"hard",q:"Sugar (sucrose) is made of carbon, hydrogen and…?",a:"Oxygen",w:["Nitrogen","Sodium","Iron"],e:"Sugars are built from carbon, hydrogen and oxygen atoms."},
+{d:"hard",q:"Which acid is produced in our stomach to help digest food?",a:"Hydrochloric acid",w:["Citric acid","Acetic acid","Sulphuric acid"],e:"The stomach makes hydrochloric acid (HCl) to help break down food."},
+{d:"hard",q:"Neutralising an acid with a base produces a salt and…?",a:"Water",w:["Oxygen","Hydrogen","More acid"],e:"Acid + base → salt + water; this reaction is called neutralisation."},
+{d:"hard",q:"Which method gives pure water from salty water?",a:"Distillation",w:["Filtration","Sieving","Magnetic separation"],e:"Distillation boils the water, then condenses the vapour, leaving salt behind."},
+{d:"hard",q:"What is the SI unit of length?",a:"Metre",w:["Kilogram","Second","Litre"],e:"Length is measured in metres (m) in the SI system."},
+{d:"hard",q:"What is the SI unit of mass?",a:"Kilogram",w:["Metre","Newton","Litre"],e:"Mass is measured in kilograms (kg)."},
+{d:"hard",q:"The unit of electric potential (voltage) is the…?",a:"Volt",w:["Ampere","Ohm","Watt"],e:"Voltage is measured in volts (V)."},
+{d:"hard",q:"A safety device that melts if too much current flows is a…?",a:"Fuse",w:["Switch","Bulb","Battery"],e:"A fuse melts and breaks the circuit if the current becomes dangerously high."},
+{d:"hard",q:"A magnet made by passing current through a coil of wire is an…?",a:"Electromagnet",w:["Permanent magnet","Insulator","Conductor"],e:"An electromagnet works only while electric current flows through its coil."},
+{d:"hard",q:"Which law states that energy cannot be created or destroyed?",a:"Conservation of energy",w:["Newton's first law","Ohm's law","Boyle's law"],e:"The law of conservation of energy says energy only changes from one form to another."},
+{d:"hard",q:"Approximately how fast does sound travel through air?",a:"About 340 m/s",w:["About 3 m/s","About 30,000 m/s","About 300,000 km/s"],e:"Sound travels about 340 metres per second in air at room temperature."},
+{d:"hard",q:"The number of protons in an atom is called its…?",a:"Atomic number",w:["Mass number","Charge","Valency"],e:"The atomic number equals the number of protons and identifies the element."},
+{d:"hard",q:"Which planet appears to spin on its side, almost lying down?",a:"Uranus",w:["Mars","Venus","Jupiter"],e:"Uranus is tilted so far that it seems to roll on its side."},
+{d:"hard",q:"What is the name of the galaxy we live in?",a:"The Milky Way",w:["Andromeda","The Solar System","Orion"],e:"Our Sun and Solar System lie within the Milky Way galaxy."},
+{d:"hard",q:"A solar eclipse happens when which body comes between the Sun and Earth?",a:"The Moon",w:["Mars","Venus","A comet"],e:"In a solar eclipse the Moon blocks the Sun's light from reaching part of the Earth."},
+{d:"hard",q:"Which is the largest ocean on Earth?",a:"Pacific Ocean",w:["Atlantic Ocean","Indian Ocean","Arctic Ocean"],e:"The Pacific is the largest and deepest ocean on Earth."},
+{d:"hard",q:"Rocks formed when molten lava or magma cools and hardens are…?",a:"Igneous rocks",w:["Sedimentary rocks","Metamorphic rocks","Fossils"],e:"Igneous rocks form from cooled, solidified molten rock."},
+{d:"hard",q:"The preserved remains of ancient living things found in rocks are…?",a:"Fossils",w:["Minerals","Crystals","Pebbles"],e:"Fossils are the remains or impressions of organisms from long ago."},
+{d:"hard",q:"Who invented the first practical electric light bulb?",a:"Thomas Edison",w:["Isaac Newton","Charles Darwin","Galileo Galilei"],e:"Thomas Edison developed the first long-lasting electric light bulb."},
+{d:"hard",q:"Which scientist is credited with inventing the telephone?",a:"Alexander Graham Bell",w:["Thomas Edison","Isaac Newton","Marie Curie"],e:"Alexander Graham Bell is credited with inventing the telephone in 1876."},
+{d:"hard",q:"Which Indian scientist won a Nobel Prize for his work on the scattering of light?",a:"C. V. Raman",w:["A. P. J. Abdul Kalam","Homi Bhabha","Vikram Sarabhai"],e:"C. V. Raman won the 1930 Nobel Prize in Physics for the 'Raman effect'."},
+{d:"hard",q:"Which Indian scientist showed that plants respond to stimuli like living things?",a:"Jagadish Chandra Bose",w:["Isaac Newton","Gregor Mendel","Louis Pasteur"],e:"J. C. Bose demonstrated that plants respond to light, touch and other stimuli."},
+{d:"hard",q:"Metals that can be hammered into thin sheets are said to be…?",a:"Malleable",w:["Brittle","Soluble","Magnetic"],e:"Malleable metals, such as gold, can be beaten into thin sheets."},
+{d:"hard",q:"Metals that can be drawn out into thin wires are said to be…?",a:"Ductile",w:["Brittle","Transparent","Magnetic"],e:"Ductile metals, such as copper, can be pulled into wires."},
+{d:"hard",q:"Pressure is defined as force divided by…?",a:"Area",w:["Time","Mass","Speed"],e:"Pressure = force ÷ area, so the same force on a smaller area gives more pressure."},
+{d:"hard",q:"Which scientist won two Nobel Prizes for her work on radioactivity?",a:"Marie Curie",w:["Isaac Newton","Charles Darwin","Galileo Galilei"],e:"Marie Curie's research on radioactivity earned her two Nobel Prizes."},
 ];
 const TIME_PER_Q = 20; // seconds to answer each question
 
@@ -552,7 +659,7 @@ function renderStats(){const s=loadStats();$('s-games').textContent=s.games;$('s
 /* ============================================================
    5) STATE + SCREENS
    ============================================================ */
-let G={questions:[],i:0,score:0,totalTime:0,combo:0,maxCombo:0,difficulty:'easy',amount:7,isChallenge:false,rival:null,myName:'Player',answered:false,qStart:0,timer:null};
+let G={questions:[],i:0,score:0,totalTime:0,combo:0,maxCombo:0,difficulty:'easy',amount:10,isChallenge:false,rival:null,myName:'Player',answered:false,qStart:0,timer:null};
 const SCREENS=['home','challenge','quiz','results'];
 function show(n){SCREENS.forEach(s=>$('screen-'+s).classList.toggle('hidden',s!==n));const el=$('screen-'+n);el.classList.remove('screen');void el.offsetWidth;el.classList.add('screen');window.scrollTo({top:0,behavior:'smooth'});}
 function goHome(){sClick();location.hash='';renderStats();show('home');}
@@ -563,12 +670,33 @@ wireSeg('diff',v=>G.difficulty=v);
 wireSeg('amount',v=>G.amount=parseInt(v,10));
 
 /* ============================================================
-   6) PICK QUESTIONS FROM THE BANK
+   6) PICK QUESTIONS — a shuffled "deck" per difficulty
+      We deal questions out of a shuffled deck and only reshuffle
+      once the whole pool has been used. So every time a student
+      retakes the quiz they get a fresh set of 10, and they cycle
+      through ALL the questions before any one repeats.
    ============================================================ */
+let memDecks=null;
+function loadDecks(){try{return JSON.parse(localStorage.getItem('quizgyan_decks'))||{};}catch(e){return memDecks||{};}}
+function saveDecks(d){try{localStorage.setItem('quizgyan_decks',JSON.stringify(d));}catch(e){memDecks=d;}}
+
 function getQuestions(amount,difficulty){
-  let pool=QUESTIONS.filter(x=>x.d===difficulty);
-  if(pool.length<amount) pool=pool.concat(QUESTIONS.filter(x=>x.d!==difficulty));
-  return shuffle(pool).slice(0,amount).map(item=>{
+  const pool=QUESTIONS.filter(x=>x.d===difficulty);
+  const decks=loadDecks();
+  // remaining shuffled indices still to be served this cycle (ignore any out-of-range after edits)
+  let deck=(Array.isArray(decks[difficulty])?decks[difficulty]:[]).filter(i=>i<pool.length);
+  const chosen=[];
+  while(chosen.length<amount && chosen.length<pool.length){
+    if(deck.length===0){
+      // whole pool used — start a fresh shuffled cycle (avoid repeating this round's picks)
+      deck=shuffle(pool.map((_,i)=>i).filter(i=>chosen.indexOf(i)===-1));
+    }
+    chosen.push(deck.shift());
+  }
+  decks[difficulty]=deck; // carry the leftovers forward to the next quiz
+  saveDecks(decks);
+  return chosen.map(idx=>{
+    const item=pool[idx];
     const opts=shuffle([item.a,...item.w]);
     return {q:item.q,o:opts,c:opts.indexOf(item.a),e:item.e};
   });
