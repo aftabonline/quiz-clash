@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Quiz Clash ⚡ Science</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   QUIZ CLASH — SCIENCE
+   A no-database, no-paid-API quiz duel.
+   Questions: Open Trivia DB (free) with a built-in fallback bank.
+   Battles travel inside the share link. Streaks live in localStorage.
+   ============================================================ */
+
+:root{
+  --bg:#0a0e1a;
+  --bg2:#0f1730;
+  --text:#eaf1ff;
+  --muted:#8095c0;
+  --line:rgba(255,255,255,.10);
+  --surface:rgba(255,255,255,.045);
+
+  --cyan:#36e6ff;   /* you / primary */
+  --lime:#b6ff3b;   /* science / correct */
+  --magenta:#ff3ea5;/* opponent / VS */
+  --amber:#ffc43d;  /* streak */
+  --red:#ff556a;    /* wrong */
+  --green:#2fe08a;  /* correct */
+
+  --font-display:'Lilita One', system-ui, sans-serif;
+  --font-body:'Nunito', system-ui, sans-serif;
+  --r:22px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:var(--font-body);
+  color:var(--text);
+  background:var(--bg);
+  background-image:
+    radial-gradient(900px 500px at 12% -8%, rgba(54,230,255,.18), transparent 60%),
+    radial-gradient(800px 500px at 100% 0%, rgba(255,62,165,.16), transparent 55%),
+    radial-gradient(900px 700px at 50% 115%, rgba(182,255,59,.10), transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+  background-attachment:fixed;
+  min-height:100dvh;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:22px 16px 60px;
+  overflow-x:hidden;
+}
+/* faint dot texture */
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size:26px 26px;
+  mask-image:radial-gradient(ellipse at 50% 30%, #000 40%, transparent 85%);
+}
+
+.app{width:100%;max-width:480px;position:relative;z-index:2}
+
+/* ---------- shared bits ---------- */
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--r);
+  padding:22px;
+  backdrop-filter:blur(8px);
+  box-shadow:0 30px 60px -30px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.screen{animation:rise .5s cubic-bezier(.2,.8,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.hidden{display:none !important}
+
+.brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px}
+.logo{
+  font-family:var(--font-display);
+  font-size:clamp(34px,9vw,46px);
+  line-height:.95;letter-spacing:.5px;
+  background:linear-gradient(92deg,var(--cyan),var(--lime));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 40px rgba(54,230,255,.25);
+}
+.badge{
+  font-family:var(--font-display);font-size:13px;letter-spacing:1px;
+  color:#06210a;background:var(--lime);
+  padding:5px 10px;border-radius:999px;transform:rotate(-3deg);
+  box-shadow:0 6px 18px -6px var(--lime);
+  display:inline-flex;gap:5px;align-items:center;
+}
+.tagline{text-align:center;color:var(--muted);font-weight:700;margin:8px 0 20px;font-size:15px}
+
+label.fld{display:block;font-weight:800;font-size:13px;color:var(--muted);margin:0 0 7px 3px;text-transform:uppercase;letter-spacing:.6px}
+input[type=text]{
+  width:100%;font-family:var(--font-body);font-weight:700;font-size:16px;color:var(--text);
+  background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px;padding:13px 15px;outline:none;
+  transition:border-color .2s, box-shadow .2s;
+}
+input[type=text]:focus{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(54,230,255,.15)}
+
+.seg{display:flex;gap:8px;margin-bottom:18px}
+.seg button{
+  flex:1;font-family:var(--font-body);font-weight:800;font-size:15px;color:var(--muted);
+  background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:14px;padding:12px 6px;cursor:pointer;
+  transition:.18s;
+}
+.seg button:hover{color:var(--text);border-color:rgba(255,255,255,.25)}
+.seg button.on{
+  color:#04121f;background:var(--cyan);border-color:var(--cyan);
+  box-shadow:0 8px 22px -8px var(--cyan);
+}
+
+.btn{
+  width:100%;font-family:var(--font-display);font-size:21px;letter-spacing:.5px;
+  color:#04121f;border:none;border-radius:16px;padding:17px;cursor:pointer;
+  background:linear-gradient(95deg,var(--cyan),var(--lime));
+  box-shadow:0 14px 30px -12px var(--cyan);
+  transition:transform .08s, box-shadow .2s, filter .2s;
+}
+.btn:hover{filter:brightness(1.05)}
+.btn:active{transform:translateY(3px);box-shadow:0 6px 16px -10px var(--cyan)}
+.btn.ghost{
+  background:transparent;color:var(--text);border:1px solid var(--line);
+  box-shadow:none;font-size:17px;
+}
+.btn.ghost:active{transform:translateY(2px)}
+.btn.pink{background:linear-gradient(95deg,var(--magenta),#ff7ac4);box-shadow:0 14px 30px -12px var(--magenta)}
+.btn.row{margin-top:10px}
+
+/* ---------- stats strip ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:18px}
+.stat{background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:14px;padding:11px 6px;text-align:center}
+.stat .n{font-family:var(--font-display);font-size:24px;line-height:1}
+.stat .l{font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
+.stat.flame .n{color:var(--amber)}
+
+.how{margin-top:16px;text-align:center}
+.how summary{cursor:pointer;color:var(--muted);font-weight:800;font-size:13px;list-style:none}
+.how summary::-webkit-details-marker{display:none}
+.how p{color:var(--muted);font-size:13.5px;line-height:1.6;margin-top:10px;text-align:left}
+
+/* ---------- quiz ---------- */
+.qtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.qcount{font-family:var(--font-display);font-size:15px;color:var(--muted);letter-spacing:.5px}
+.qscore{font-family:var(--font-display);font-size:15px;color:var(--lime);background:rgba(182,255,59,.12);padding:5px 12px;border-radius:999px}
+.timerwrap{height:9px;background:rgba(0,0,0,.3);border-radius:999px;overflow:hidden;margin-bottom:18px;border:1px solid var(--line)}
+.timerbar{height:100%;width:100%;background:linear-gradient(90deg,var(--lime),var(--cyan));border-radius:999px;transition:width .12s linear}
+.timerbar.warn{background:linear-gradient(90deg,var(--amber),var(--red))}
+
+.question{font-family:var(--font-body);font-weight:800;font-size:clamp(19px,5vw,23px);line-height:1.35;margin-bottom:20px;min-height:64px}
+
+.opts{display:flex;flex-direction:column;gap:11px}
+.opt{
+  display:flex;align-items:center;gap:13px;text-align:left;
+  font-family:var(--font-body);font-weight:700;font-size:16px;color:var(--text);
+  background:rgba(255,255,255,.04);border:1.5px solid var(--line);border-radius:15px;padding:15px 15px;cursor:pointer;
+  transition:transform .08s, border-color .15s, background .15s;
+}
+.opt:hover:not([disabled]){border-color:rgba(255,255,255,.35);transform:translateX(3px)}
+.opt[disabled]{cursor:default}
+.opt .key{
+  flex:none;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;
+  font-family:var(--font-display);font-size:15px;color:var(--muted);
+  background:rgba(0,0,0,.3);border:1px solid var(--line);
+}
+.opt.correct{border-color:var(--green);background:rgba(47,224,138,.16)}
+.opt.correct .key{background:var(--green);color:#04210f}
+.opt.wrong{border-color:var(--red);background:rgba(255,85,106,.16);animation:shake .4s}
+.opt.wrong .key{background:var(--red);color:#2a0007}
+.opt .mark{margin-left:auto;font-family:var(--font-display);font-size:18px}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+
+/* ---------- challenge intro ---------- */
+.vs-intro{text-align:center}
+.swords{font-size:52px;filter:drop-shadow(0 8px 22px rgba(255,62,165,.5));animation:pop .6s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.challenger{font-family:var(--font-display);font-size:clamp(26px,7vw,34px);margin:12px 0 4px;line-height:1.05}
+.challenger b{color:var(--magenta)}
+.target{color:var(--muted);font-weight:800;margin-bottom:6px}
+.target .beat{color:var(--amber)}
+
+/* ---------- results ---------- */
+.res{text-align:center}
+.verdict{font-family:var(--font-display);font-size:clamp(40px,11vw,56px);line-height:1;margin-bottom:4px}
+.verdict.win{color:var(--lime);text-shadow:0 0 40px rgba(182,255,59,.4)}
+.verdict.lose{color:var(--magenta)}
+.verdict.draw{color:var(--cyan)}
+.verdict.solo{background:linear-gradient(92deg,var(--cyan),var(--lime));-webkit-background-clip:text;background-clip:text;color:transparent}
+.scoreline{font-family:var(--font-display);font-size:64px;line-height:1;margin:14px 0 4px}
+.scoreline small{font-size:26px;color:var(--muted)}
+.subtle{color:var(--muted);font-weight:700;margin-bottom:18px}
+
+.compare{display:flex;flex-direction:column;gap:12px;margin:18px 0}
+.cmp{text-align:left}
+.cmp .top{display:flex;justify-content:space-between;font-weight:800;font-size:14px;margin-bottom:6px}
+.cmp .top .who{display:flex;align-items:center;gap:7px}
+.cmp .top .pts{font-family:var(--font-display);font-size:16px}
+.bar{height:14px;background:rgba(0,0,0,.3);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;border-radius:999px;width:0;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.cmp.me .pts{color:var(--cyan)} .cmp.me .bar i{background:linear-gradient(90deg,var(--cyan),var(--lime))}
+.cmp.them .pts{color:var(--magenta)} .cmp.them .bar i{background:linear-gradient(90deg,var(--magenta),#ff8fcb)}
+
+.streakbox{display:flex;align-items:center;justify-content:center;gap:10px;background:rgba(255,196,61,.1);border:1px solid rgba(255,196,61,.3);border-radius:14px;padding:12px;margin-bottom:18px;font-weight:800}
+.streakbox .f{font-size:24px}
+.streakbox b{font-family:var(--font-display);color:var(--amber);font-size:22px}
+
+/* share box */
+.sharebox{margin-top:14px;display:none}
+.sharebox.show{display:block;animation:rise .35s both}
+.linkrow{display:flex;gap:8px;margin-top:8px}
+.linkrow input{font-size:13px;font-weight:600;color:var(--muted)}
+.copybtn{flex:none;font-family:var(--font-display);font-size:14px;color:#04121f;background:var(--lime);border:none;border-radius:12px;padding:0 16px;cursor:pointer}
+.copybtn:active{transform:translateY(2px)}
+.copyhint{font-size:12.5px;color:var(--muted);margin-top:8px;text-align:center}
+
+/* loader */
+.loader{text-align:center;padding:40px 10px}
+.spinner{width:46px;height:46px;border-radius:50%;border:5px solid rgba(255,255,255,.12);border-top-color:var(--cyan);margin:0 auto 16px;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader p{color:var(--muted);font-weight:800}
+
+.footnote{text-align:center;color:var(--muted);font-size:12px;margin-top:18px;opacity:.7}
+
+/* confetti */
+.confetti{position:fixed;top:-12px;width:9px;height:14px;border-radius:2px;z-index:50;animation:fall 2.3s ease-in forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:.9}}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001s !important;transition-duration:.05s !important}
+  .confetti{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ HOME ============ -->
+  <section id="screen-home" class="screen">
+    <div class="brand">
+      <div class="logo">QUIZ CLASH</div>
+      <span class="badge">⚛ SCIENCE</span>
+    </div>
+    <p class="tagline">Pick your battle. Beat your friends. Build your streak.</p>
+
+    <div class="card">
+      <label class="fld" for="name">Your name</label>
+      <input type="text" id="name" maxlength="14" placeholder="e.g. Aarav" autocomplete="off" />
+
+      <label class="fld" style="margin-top:16px">Difficulty</label>
+      <div class="seg" id="diff">
+        <button data-v="easy" class="on">Easy</button>
+        <button data-v="medium">Medium</button>
+        <button data-v="hard">Hard</button>
+      </div>
+
+      <label class="fld">Questions</label>
+      <div class="seg" id="amount">
+        <button data-v="5">5</button>
+        <button data-v="7" class="on">7</button>
+        <button data-v="10">10</button>
+      </div>
+
+      <button class="btn" onclick="startSolo()">⚔ START BATTLE</button>
+
+      <div class="stats">
+        <div class="stat"><div class="n" id="s-games">0</div><div class="l">Battles</div></div>
+        <div class="stat"><div class="n" id="s-wins">0</div><div class="l">Wins</div></div>
+        <div class="stat flame"><div class="n" id="s-streak">0</div><div class="l">🔥 Streak</div></div>
+        <div class="stat"><div class="n" id="s-best">0</div><div class="l">Best</div></div>
+      </div>
+
+      <details class="how">
+        <summary>❔ How does it work?</summary>
+        <p>Play a round to set your score, then tap <b>Challenge a friend</b> — you'll get a link that holds your exact questions and score. Send it anywhere. When your friend opens it, they face the same questions and find out who won. Win a duel and your 🔥 streak grows!</p>
+      </details>
+    </div>
+    <p class="footnote">Questions from the Open Trivia DB · works offline with a built-in set</p>
+  </section>
+
+  <!-- ============ CHALLENGE INTRO ============ -->
+  <section id="screen-challenge" class="screen card hidden vs-intro">
+    <div class="swords">⚔️</div>
+    <div class="challenger"><b id="ch-name">Someone</b><br>challenges you!</div>
+    <p class="target"><span id="ch-count">7</span> Science questions · beat their score of <span class="beat" id="ch-score">0/0</span></p>
+    <div style="margin:18px 0 6px">
+      <label class="fld" for="name2" style="text-align:center">Your name</label>
+      <input type="text" id="name2" maxlength="14" placeholder="e.g. Diya" autocomplete="off" />
+    </div>
+    <button class="btn pink" onclick="acceptChallenge()">🔥 ACCEPT CHALLENGE</button>
+    <button class="btn ghost row" onclick="goHome()">Play my own instead</button>
+  </section>
+
+  <!-- ============ LOADER ============ -->
+  <section id="screen-loading" class="screen card hidden">
+    <div class="loader">
+      <div class="spinner"></div>
+      <p id="load-msg">Pulling fresh questions…</p>
+    </div>
+  </section>
+
+  <!-- ============ QUIZ ============ -->
+  <section id="screen-quiz" class="screen card hidden">
+    <div class="qtop">
+      <span class="qcount" id="q-count">Question 1 / 7</span>
+      <span class="qscore" id="q-score">★ 0</span>
+    </div>
+    <div class="timerwrap"><div class="timerbar" id="timerbar"></div></div>
+    <div class="question" id="q-text">…</div>
+    <div class="opts" id="q-opts"></div>
+  </section>
+
+  <!-- ============ RESULTS ============ -->
+  <section id="screen-results" class="screen card hidden res">
+    <div class="verdict" id="r-verdict">DONE</div>
+    <div class="scoreline" id="r-score">0<small>/0</small></div>
+    <p class="subtle" id="r-sub"></p>
+
+    <div class="compare hidden" id="r-compare">
+      <div class="cmp me">
+        <div class="top"><span class="who">🟦 <span id="r-me-name">You</span></span><span class="pts" id="r-me-pts">0</span></div>
+        <div class="bar"><i id="r-me-bar"></i></div>
+      </div>
+      <div class="cmp them">
+        <div class="top"><span class="who">🟪 <span id="r-them-name">Rival</span></span><span class="pts" id="r-them-pts">0</span></div>
+        <div class="bar"><i id="r-them-bar"></i></div>
+      </div>
+    </div>
+
+    <div class="streakbox hidden" id="r-streakbox">
+      <span class="f">🔥</span><span>Win streak: <b id="r-streak">0</b></span>
+    </div>
+
+    <button class="btn pink" onclick="shareChallenge()">⚔ CHALLENGE A FRIEND</button>
+
+    <div class="sharebox" id="sharebox">
+      <div class="linkrow">
+        <input type="text" id="sharelink" readonly />
+        <button class="copybtn" id="copybtn" onclick="copyLink()">COPY</button>
+      </div>
+      <p class="copyhint" id="copyhint">Send this link to a friend so they can take you on 👆</p>
+    </div>
+
+    <button class="btn ghost row" onclick="playAgain()">↻ Play again</button>
+    <button class="btn ghost row" onclick="goHome()">🏠 Home</button>
+  </section>
+
+  <p class="footnote" id="brandfoot" style="margin-top:22px">Quiz Clash · a student-built study game</p>
+</div>
+
+<script>
+/* ============================================================
+   1) BUILT-IN SCIENCE QUESTION BANK (offline fallback)
+   Used automatically if the Open Trivia DB can't be reached.
+   You can add your own syllabus questions right here.
+   ============================================================ */
+const SCIENCE_BANK = [
+  // ---- easy ----
+  {d:"easy", q:"What gas do plants absorb from the air during photosynthesis?", correct:"Carbon dioxide", wrong:["Oxygen","Nitrogen","Hydrogen"]},
+  {d:"easy", q:"What is the centre of an atom called?", correct:"Nucleus", wrong:["Electron","Orbit","Shell"]},
+  {d:"easy", q:"Which planet is known as the Red Planet?", correct:"Mars", wrong:["Venus","Jupiter","Mercury"]},
+  {d:"easy", q:"H₂O is the chemical formula for…", correct:"Water", wrong:["Salt","Oxygen","Air"]},
+  {d:"easy", q:"Which organ pumps blood around the body?", correct:"Heart", wrong:["Lungs","Liver","Brain"]},
+  {d:"easy", q:"What force pulls objects towards the Earth?", correct:"Gravity", wrong:["Magnetism","Friction","Tension"]},
+  {d:"easy", q:"How many legs does an insect have?", correct:"Six", wrong:["Four","Eight","Ten"]},
+  {d:"easy", q:"Which part of a plant makes seeds?", correct:"Flower", wrong:["Root","Leaf","Stem"]},
+  // ---- medium ----
+  {d:"medium", q:"What is the chemical symbol for gold?", correct:"Au", wrong:["Gd","Go","Ag"]},
+  {d:"medium", q:"Which part of a plant cell carries out photosynthesis?", correct:"Chloroplast", wrong:["Nucleus","Vacuole","Ribosome"]},
+  {d:"medium", q:"What type of energy does a moving object have?", correct:"Kinetic energy", wrong:["Potential energy","Chemical energy","Sound energy"]},
+  {d:"medium", q:"Sound cannot travel through which of these?", correct:"A vacuum", wrong:["Water","Air","Steel"]},
+  {d:"medium", q:"Which gas makes up most of Earth's atmosphere?", correct:"Nitrogen", wrong:["Oxygen","Carbon dioxide","Argon"]},
+  {d:"medium", q:"The change of a liquid into a gas is called…", correct:"Evaporation", wrong:["Condensation","Freezing","Melting"]},
+  {d:"medium", q:"The 'powerhouse' of the cell is the…", correct:"Mitochondrion", wrong:["Nucleus","Ribosome","Cell wall"]},
+  // ---- hard ----
+  {d:"hard", q:"What is the pH value of a neutral solution?", correct:"7", wrong:["0","14","1"]},
+  {d:"hard", q:"Who proposed the three laws of motion?", correct:"Isaac Newton", wrong:["Albert Einstein","Galileo Galilei","Nikola Tesla"]},
+  {d:"hard", q:"Roughly, what is the speed of light in a vacuum?", correct:"300,000 km/s", wrong:["150,000 km/s","3,000 km/s","1,080 km/s"]},
+  {d:"hard", q:"Which blood cells help fight infection?", correct:"White blood cells", wrong:["Red blood cells","Platelets","Plasma"]},
+  {d:"hard", q:"What is the chemical formula for table salt?", correct:"NaCl", wrong:["KCl","NaOH","HCl"]},
+];
+const SCIENCE_CATEGORY = 17; // Open Trivia DB "Science & Nature"
+const TIME_PER_Q = 20;       // seconds
+
+/* ============================================================
+   2) SMALL HELPERS
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+// Open Trivia DB returns HTML entities (&quot;, &#039;…) — turn them back into characters.
+function decodeHTML(s){const t=document.createElement('textarea');t.innerHTML=s;return t.value;}
+
+// URL-safe base64 (handles emoji / accents safely)
+function encodeState(obj){
+  const json=JSON.stringify(obj);
+  const b64=btoa(encodeURIComponent(json).replace(/%([0-9A-F]{2})/g,(_,p)=>String.fromCharCode(parseInt(p,16))));
+  return b64.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decodeState(str){
+  let b64=str.replace(/-/g,'+').replace(/_/g,'/');
+  while(b64.length%4)b64+='=';
+  const json=decodeURIComponent(Array.prototype.map.call(atob(b64),c=>'%'+('00'+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+  return JSON.parse(json);
+}
+
+/* ============================================================
+   3) LOCAL STATS (localStorage, with a safe in-memory fallback)
+   ============================================================ */
+let memStats=null; // used if localStorage is blocked (e.g. inside a sandbox)
+function loadStats(){
+  const def={games:0,wins:0,streak:0,best:0,name:""};
+  try{const raw=localStorage.getItem('quizclash');return raw?{...def,...JSON.parse(raw)}:def;}
+  catch(e){return memStats||def;}
+}
+function saveStats(s){
+  try{localStorage.setItem('quizclash',JSON.stringify(s));}
+  catch(e){memStats=s;}
+}
+function renderStats(){
+  const s=loadStats();
+  $('s-games').textContent=s.games;
+  $('s-wins').textContent=s.wins;
+  $('s-streak').textContent=s.streak;
+  $('s-best').textContent=s.best;
+  if(s.name){$('name').value=s.name;$('name2').value=s.name;}
+}
+
+/* ============================================================
+   4) APP STATE
+   ============================================================ */
+let G={
+  questions:[],   // [{q, o:[opts], c:correctIndex}]
+  i:0, score:0, totalTime:0,
+  difficulty:'easy', amount:7,
+  isChallenge:false, rival:null,  // {name, score, count, time}
+  myName:'Player',
+  answered:false, qStart:0, timer:null,
+};
+
+/* ============================================================
+   5) SCREEN SWITCHING
+   ============================================================ */
+const SCREENS=['home','challenge','loading','quiz','results'];
+function show(name){
+  SCREENS.forEach(s=>$('screen-'+s).classList.toggle('hidden', s!==name));
+  // re-trigger entrance animation
+  const el=$('screen-'+name);
+  el.classList.remove('screen');void el.offsetWidth;el.classList.add('screen');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goHome(){location.hash='';renderStats();show('home');}
+
+/* ============================================================
+   6) SEGMENTED CONTROLS (difficulty / amount)
+   ============================================================ */
+function wireSeg(id, onpick){
+  $(id).querySelectorAll('button').forEach(b=>{
+    b.onclick=()=>{
+      $(id).querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');onpick(b.dataset.v);
+    };
+  });
+}
+wireSeg('diff', v=>G.difficulty=v);
+wireSeg('amount', v=>G.amount=parseInt(v,10));
+
+/* ============================================================
+   7) GET QUESTIONS  (Open Trivia DB → fallback to bank)
+   ============================================================ */
+async function fetchFromAPI(amount, difficulty){
+  const url=`https://opentdb.com/api.php?amount=${amount}&category=${SCIENCE_CATEGORY}&difficulty=${difficulty}&type=multiple&encode=url3986`;
+  const res=await fetch(url);
+  if(!res.ok) throw new Error('network');
+  const data=await res.json();
+  if(data.response_code!==0 || !data.results || !data.results.length) throw new Error('no results');
+  return data.results.map(item=>{
+    const correct=decodeURIComponent(item.correct_answer);
+    const opts=shuffle([correct, ...item.incorrect_answers.map(decodeURIComponent)]);
+    return {q:decodeURIComponent(item.question), o:opts, c:opts.indexOf(correct)};
+  });
+}
+function fromBank(amount, difficulty){
+  let pool=SCIENCE_BANK.filter(x=>x.d===difficulty);
+  if(pool.length<amount) pool=pool.concat(SCIENCE_BANK.filter(x=>x.d!==difficulty));
+  return shuffle(pool).slice(0,amount).map(item=>{
+    const opts=shuffle([item.correct, ...item.wrong]);
+    return {q:item.q, o:opts, c:opts.indexOf(item.correct)};
+  });
+}
+async function getQuestions(amount, difficulty){
+  try{ return await fetchFromAPI(amount, difficulty); }
+  catch(e){ return fromBank(amount, difficulty); }
+}
+
+/* ============================================================
+   8) START A ROUND
+   ============================================================ */
+async function startSolo(){
+  G.myName=($('name').value.trim()||'Player').slice(0,14);
+  const s=loadStats();s.name=G.myName;saveStats(s);
+  G.isChallenge=false;G.rival=null;
+  show('loading');$('load-msg').textContent='Pulling fresh Science questions…';
+  G.questions=await getQuestions(G.amount, G.difficulty);
+  beginQuiz();
+}
+function acceptChallenge(){
+  G.myName=($('name2').value.trim()||'Player').slice(0,14);
+  const s=loadStats();s.name=G.myName;saveStats(s);
+  beginQuiz(); // questions already loaded from the link
+}
+
+/* ============================================================
+   9) QUIZ ENGINE
+   ============================================================ */
+function beginQuiz(){
+  G.i=0;G.score=0;G.totalTime=0;
+  show('quiz');renderQuestion();
+}
+function renderQuestion(){
+  G.answered=false;
+  const item=G.questions[G.i];
+  $('q-count').textContent=`Question ${G.i+1} / ${G.questions.length}`;
+  $('q-score').textContent='★ '+G.score;
+  $('q-text').textContent=item.q;
+
+  const box=$('q-opts');box.innerHTML='';
+  const letters=['A','B','C','D','E'];
+  item.o.forEach((opt,idx)=>{
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML=`<span class="key">${letters[idx]}</span><span>${opt}</span><span class="mark"></span>`;
+    b.onclick=()=>answer(idx);
+    box.appendChild(b);
+  });
+  startTimer();
+}
+function startTimer(){
+  clearInterval(G.timer);
+  G.qStart=Date.now();
+  const bar=$('timerbar');bar.classList.remove('warn');bar.style.transition='none';bar.style.width='100%';
+  void bar.offsetWidth;bar.style.transition='width .12s linear';
+  const total=TIME_PER_Q*1000;
+  G.timer=setInterval(()=>{
+    const left=total-(Date.now()-G.qStart);
+    const pct=Math.max(0,left/total*100);
+    bar.style.width=pct+'%';
+    if(pct<35) bar.classList.add('warn');
+    if(left<=0){clearInterval(G.timer);answer(-1);}
+  },100);
+}
+function answer(idx){
+  if(G.answered) return;
+  G.answered=true;
+  clearInterval(G.timer);
+  const elapsed=Math.min(TIME_PER_Q,(Date.now()-G.qStart)/1000);
+  G.totalTime += (idx===-1)? TIME_PER_Q : elapsed;
+
+  const correct=G.questions[G.i].c;
+  const opts=$('q-opts').children;
+  for(let k=0;k<opts.length;k++) opts[k].setAttribute('disabled','');
+  opts[correct].classList.add('correct');
+  opts[correct].querySelector('.mark').textContent='✓';
+  if(idx===correct){
+    G.score++;
+    $('q-score').textContent='★ '+G.score;
+  }else if(idx>=0){
+    opts[idx].classList.add('wrong');
+    opts[idx].querySelector('.mark').textContent='✕';
+  }
+  setTimeout(next, idx===correct?850:1250);
+}
+function next(){
+  G.i++;
+  if(G.i<G.questions.length) renderQuestion();
+  else finishQuiz();
+}
+
+/* ============================================================
+   10) RESULTS + STREAK
+   ============================================================ */
+function finishQuiz(){
+  const stats=loadStats();
+  stats.games++;
+  if(G.score>stats.best) stats.best=G.score;
+
+  const v=$('r-verdict'), compare=$('r-compare'), streakbox=$('r-streakbox');
+  $('r-score').innerHTML=`${G.score}<small>/${G.questions.length}</small>`;
+  compare.classList.add('hidden');streakbox.classList.add('hidden');
+  v.className='verdict';
+
+  if(G.isChallenge && G.rival){
+    // decide the duel: more correct wins; tie broken by faster total time
+    let win;
+    if(G.score>G.rival.score) win='win';
+    else if(G.score<G.rival.score) win='lose';
+    else win = (G.totalTime < G.rival.time) ? 'win' : (G.totalTime > G.rival.time ? 'lose' : 'draw');
+
+    if(win==='win'){v.textContent='YOU WIN! 🏆';v.classList.add('win');stats.wins++;stats.streak++;if(!reducedMotion)celebrate();}
+    else if(win==='lose'){v.textContent='YOU LOST 💪';v.classList.add('lose');stats.streak=0;}
+    else{v.textContent="IT'S A DRAW";v.classList.add('draw');}
+
+    // comparison bars
+    const max=Math.max(G.score,G.rival.score,1);
+    $('r-me-name').textContent=G.myName;
+    $('r-them-name').textContent=G.rival.name;
+    $('r-me-pts').textContent=G.score; $('r-them-pts').textContent=G.rival.score;
+    compare.classList.remove('hidden');
+    setTimeout(()=>{ $('r-me-bar').style.width=(G.score/max*100)+'%'; $('r-them-bar').style.width=(G.rival.score/max*100)+'%'; },120);
+
+    $('r-sub').textContent = win==='draw'
+      ? `Dead even on ${G.questions.length} questions!`
+      : (win==='win'?`You beat ${G.rival.name} ${G.score}–${G.rival.score}!`:`${G.rival.name} edged you ${G.rival.score}–${G.score}.`);
+
+    streakbox.classList.remove('hidden');
+    $('r-streak').textContent=stats.streak;
+  }else{
+    // solo practice round — no opponent yet
+    v.textContent='NICE ONE!';v.classList.add('solo');
+    const pct=Math.round(G.score/G.questions.length*100);
+    $('r-sub').textContent=`You scored ${pct}%. Now make it count — challenge a friend!`;
+  }
+
+  saveStats(stats);
+  // reset the share box each time
+  $('sharebox').classList.remove('show');
+  $('copybtn').textContent='COPY';
+  show('results');
+}
+
+/* ============================================================
+   11) BUILD + COPY THE CHALLENGE LINK
+   The whole battle lives in the link — no server needed.
+   ============================================================ */
+function shareChallenge(){
+  const payload={
+    v:1,
+    n:G.myName,
+    s:G.score,
+    t:Math.round(G.totalTime),
+    d:G.difficulty,
+    q:G.questions.map(x=>({q:x.q,o:x.o,c:x.c})),
+  };
+  const link=location.origin+location.pathname+'#b='+encodeState(payload);
+  $('sharelink').value=link;
+  $('sharebox').classList.add('show');
+  copyLink();
+}
+function copyLink(){
+  const input=$('sharelink'); const link=input.value;
+  const done=()=>{ $('copybtn').textContent='COPIED ✓'; $('copyhint').textContent='Link copied! Paste it to your friend 🎉'; };
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(link).then(done).catch(()=>fallbackCopy(input,done));
+  }else{ fallbackCopy(input,done); }
+}
+function fallbackCopy(input,done){
+  input.removeAttribute('readonly');input.select();input.setSelectionRange(0,99999);
+  try{document.execCommand('copy');done();}catch(e){$('copyhint').textContent='Tap the link, then copy it manually.';}
+  input.setAttribute('readonly','');
+}
+function playAgain(){
+  if(G.isChallenge){ acceptChallenge(); } // same questions, replay
+  else { startSolo(); }                    // fresh questions
+}
+
+/* ============================================================
+   12) CONFETTI (win celebration)
+   ============================================================ */
+function celebrate(){
+  const colors=['#36e6ff','#b6ff3b','#ff3ea5','#ffc43d','#2fe08a'];
+  for(let i=0;i<90;i++){
+    const c=document.createElement('div');
+    c.className='confetti';
+    c.style.left=Math.random()*100+'vw';
+    c.style.background=colors[i%colors.length];
+    c.style.animationDelay=(Math.random()*0.5)+'s';
+    c.style.animationDuration=(1.8+Math.random()*1.1)+'s';
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3200);
+  }
+}
+
+/* ============================================================
+   13) STARTUP — is this a challenge link?
+   ============================================================ */
+function init(){
+  renderStats();
+  const params=new URLSearchParams(location.hash.slice(1));
+  const b=params.get('b');
+  if(b){
+    try{
+      const data=decodeState(b);
+      if(data && data.q && data.q.length){
+        G.questions=data.q.map(x=>({q:x.q,o:x.o,c:x.c}));
+        G.isChallenge=true;
+        G.rival={name:(data.n||'A friend').slice(0,14), score:data.s, count:data.q.length, time:data.t||9999};
+        $('ch-name').textContent=G.rival.name;
+        $('ch-count').textContent=G.rival.count;
+        $('ch-score').textContent=`${G.rival.score}/${G.rival.count}`;
+        show('challenge');
+        return;
+      }
+    }catch(e){ /* bad/old link → just go home */ }
+  }
+  show('home');
+}
+init();
+</script>
+</body>
+</html>
